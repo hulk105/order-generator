@@ -8,10 +8,14 @@ m - max entry
 import math
 
 
-def lcg(x, c, a, m):
-    return (a * x + c) % m
+def lcg(x, c, a, m, iteration):
+    count = 1
+    temp = (a * x + c) % m
+    while count != iteration:
+        temp = (a * temp + c) % m
+        count += 1
+    return temp
 
-print(lcg(0,4.33,1.333,1))
 
 # DICT KEYS
 X = "X"
@@ -23,8 +27,9 @@ MAX_ENTRIES = "max_entries"
 # CONSTANTS
 ORDER_ID_INDEX = 1
 PROVIDER_ID_INDEX = 2
-ENTRIES = 2000
-ORDERS = [[] for i in range(ENTRIES)]
+PHI = (math.sqrt(5) + 1) / 2
+ITERATIONS = 2000
+ORDERS = [[] for i in range(ITERATIONS)]
 
 # LCG PARAMS
 ORDER_ID = {
@@ -35,31 +40,31 @@ ORDER_ID = {
 }
 PROVIDER_ID = {
     X: 0,
-    C: 4.33,
+    C: 0.33,
     A: 1.333,
     M: 1
 }
 PROVIDER_ID_VALUES = ['SQM', 'FXCM']
 
 
-def generate_order_id(x, c, a, m):
-    return format(lcg(x, c, a, m), 'x')
+def generate_order_id(x, c, a, m, iteration):
+    return format(lcg(x, c, a, m, iteration), 'x')
 
 
-def generate_provider_id(x, c, a, m):
-    return PROVIDER_ID_VALUES[math.ceil(lcg(x, c, a, m))]
+def generate_provider_id(x, c, a, m, iteration):
+    return PROVIDER_ID_VALUES[round(lcg(x, c, a, m, iteration))]
 
 
 if __name__ == "__main__":
-    for i in range(ENTRIES):
+    for i in range(ITERATIONS):
         ORDERS[i].append(i)
 
         if i == 0:
             ORDERS[i].append(format(ORDER_ID.get(X), 'x'))
             ORDERS[i].append(PROVIDER_ID_VALUES[PROVIDER_ID.get(X)])
         else:
-            ORDERS[i].append(generate_order_id(int(ORDERS[i-1][ORDER_ID_INDEX], 16), ORDER_ID.get(C), ORDER_ID.get(A), ORDER_ID.get(M)))
-            ORDERS[i].append(generate_provider_id(ORDERS[i-1][PROVIDER_ID_INDEX], PROVIDER_ID.get(C), PROVIDER_ID.get(A), PROVIDER_ID.get(M)))
+            ORDERS[i].append(generate_order_id(ORDER_ID.get(X), ORDER_ID.get(C), ORDER_ID.get(A), ORDER_ID.get(M), i))
+            ORDERS[i].append(generate_provider_id(PROVIDER_ID.get(X), PROVIDER_ID.get(C), PROVIDER_ID.get(A), PROVIDER_ID.get(M), i))
 
 
 for order in ORDERS:
