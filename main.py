@@ -9,7 +9,7 @@ import math
 
 
 def lcg(x, c, a, m, iteration):
-    count = 1
+    count = 0
     temp = (a * x + c) % m
     while count != iteration:
         temp = (a * temp + c) % m
@@ -38,6 +38,7 @@ ORDER_ID = {
     A: 1,
     M: 549755813887,
 }
+
 PROVIDER_ID = {
     X: 0,
     C: 0.33,
@@ -45,6 +46,14 @@ PROVIDER_ID = {
     M: 1
 }
 PROVIDER_ID_VALUES = ['SQM', 'FXCM']
+
+DIRECTION = {
+    X: 0,
+    C: 0.76473,
+    A: 1.333,
+    M: 1
+}
+DIRECTION_VALUES = ['Buy', 'Sell']
 
 
 def generate_order_id(x, c, a, m, iteration):
@@ -55,16 +64,17 @@ def generate_provider_id(x, c, a, m, iteration):
     return PROVIDER_ID_VALUES[round(lcg(x, c, a, m, iteration))]
 
 
+def generate_direction(x, c, a, m, iteration):
+    return DIRECTION_VALUES[round(lcg(x, c, a, m, iteration))]
+
+
 if __name__ == "__main__":
     for i in range(ITERATIONS):
         ORDERS[i].append(i)
 
-        if i == 0:
-            ORDERS[i].append(format(ORDER_ID.get(X), 'x'))
-            ORDERS[i].append(PROVIDER_ID_VALUES[PROVIDER_ID.get(X)])
-        else:
-            ORDERS[i].append(generate_order_id(ORDER_ID.get(X), ORDER_ID.get(C), ORDER_ID.get(A), ORDER_ID.get(M), i))
-            ORDERS[i].append(generate_provider_id(PROVIDER_ID.get(X), PROVIDER_ID.get(C), PROVIDER_ID.get(A), PROVIDER_ID.get(M), i))
+        ORDERS[i].append(generate_order_id(ORDER_ID.get(X), ORDER_ID.get(C), ORDER_ID.get(A), ORDER_ID.get(M), i))
+        ORDERS[i].append(generate_provider_id(PROVIDER_ID.get(X), PROVIDER_ID.get(C), PROVIDER_ID.get(A), PROVIDER_ID.get(M), i))
+        ORDERS[i].append(generate_direction(DIRECTION.get(X), DIRECTION.get(C), DIRECTION.get(A), DIRECTION.get(M), i))
 
 
 for order in ORDERS:
