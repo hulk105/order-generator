@@ -2,19 +2,19 @@
 first_entry - first entry
 multiplier - coeff
 step - step
-max_entries - max entry
+max_entry - max entry
 549755813887 = 7FFFFFFFFF
 '''
 
 import math
 import random
-
+from mylogging import logger
 
 # DICT KEYS
 first_entry = 'first_entry'
 step = 'step'
 multiplier = 'multiplier'
-max_entries = 'max_entries'
+max_entry = 'max_entry'
 
 # CONSTANTS
 ORDER_ID_INDEX = 1
@@ -29,29 +29,12 @@ CREATION_DATE_INDEX = 9
 CHANGE_DATE_INDEX = 10
 STATUS_INDEX = 11
 
-ITERATIONS = 2000
-
 # LCG PARAMS
-ORDER_ID = {
-    first_entry: 254781069873,
-    step: 1354,
-    multiplier: 1,
-    max_entries: 549755813887,
-}
-
-PROVIDER_ID = {
-    first_entry: 0,
-    step: 0.33,
-    multiplier: 1.333,
-    max_entries: 1
-}
-PROVIDER_ID_VALUES = ['SQM', 'FXCM']
-
 DIRECTION = {
     first_entry: 0,
     step: 0.76473,
     multiplier: 1.333,
-    max_entries: 1
+    max_entry: 1
 }
 DIRECTION_VALUES = ['Buy', 'Sell']
 
@@ -59,13 +42,13 @@ CURRENCY_PAIR = {
     first_entry: 0,
     step: 1.3,
     multiplier: 3.5,
-    max_entries: 19
+    max_entry: 19
 }
 CURRENCY_PAIR_DELTA = {
     first_entry: [256, 3],
     step: [1.333, 1.3],
     multiplier: [333, 4.77],
-    max_entries: [1000, 100]
+    max_entry: [1000, 100]
 }
 CURRENCY_PAIR_VALUES = [
     (['EUR', 'USD'], 1.120199),
@@ -91,24 +74,24 @@ CURRENCY_PAIR_VALUES = [
 ]
 
 
-def lcg(first_entry, step, multiplier, max_entries, iteration):
+def lcg(first_entry, step, multiplier, max_entry, iteration):
     count = 0
-    next_entry = (first_entry * multiplier + step) % max_entries
+    next_entry = (first_entry * multiplier + step) % max_entry
     while count != iteration:
-        next_entry = (next_entry * multiplier + step) % max_entries
+        next_entry = (next_entry * multiplier + step) % max_entry
         count += 1
     return next_entry
 
 
-def generate_order_id(first_entry, step, multiplier, max_entries, iteration):
-    lcg_result = lcg(first_entry, step, multiplier, max_entries, iteration)
+def generate_order_id(first_entry, step, multiplier, max_entry, iteration):
+    lcg_result = lcg(first_entry, step, multiplier, max_entry, iteration)
 
     # Format to hex
     return format(lcg_result, 'x')
 
 
-def generate_provider_id(first_entry, step, multiplier, max_entries, iteration, values):
-    lcg_result = lcg(first_entry, step, multiplier, max_entries, iteration)
+def generate_provider_id(first_entry, step, multiplier, max_entry, iteration, values):
+    lcg_result = lcg(first_entry, step, multiplier, max_entry, iteration)
 
     # Get value by lcg generated index
     try:
@@ -118,8 +101,8 @@ def generate_provider_id(first_entry, step, multiplier, max_entries, iteration, 
 
 
 # SAME AS generate_provider_id
-def generate_direction(first_entry, step, multiplier, max_entries, iteration, values):
-    lcg_result = lcg(first_entry, step, multiplier, max_entries, iteration)
+def generate_direction(first_entry, step, multiplier, max_entry, iteration, values):
+    lcg_result = lcg(first_entry, step, multiplier, max_entry, iteration)
 
     # Get value by lcg generated index
     try:
@@ -133,17 +116,17 @@ def generate_currency_pair(status, iteration):
         CURRENCY_PAIR.get(first_entry),
         CURRENCY_PAIR.get(step),
         CURRENCY_PAIR.get(multiplier),
-        CURRENCY_PAIR.get(max_entries),
+        CURRENCY_PAIR.get(max_entry),
         iteration))]
 
     currency_pair_to_string = str(currency_pair[0][0] + '/' + currency_pair[0][1])
     delta = round(lcg(CURRENCY_PAIR_DELTA.get(first_entry)[status], CURRENCY_PAIR_DELTA.get(step)[status],
-                      CURRENCY_PAIR_DELTA.get(multiplier)[status], CURRENCY_PAIR_DELTA.get(max_entries)[status],
+                      CURRENCY_PAIR_DELTA.get(multiplier)[status], CURRENCY_PAIR_DELTA.get(max_entry)[status],
                       iteration))
 
     delta_parity = round(
         lcg(CURRENCY_PAIR_DELTA.get(first_entry)[status + 1], CURRENCY_PAIR_DELTA.get(step)[status + 1],
-            CURRENCY_PAIR_DELTA.get(multiplier)[status + 1], CURRENCY_PAIR_DELTA.get(max_entries)[status + 1],
+            CURRENCY_PAIR_DELTA.get(multiplier)[status + 1], CURRENCY_PAIR_DELTA.get(max_entry)[status + 1],
             iteration))
 
     if delta_parity % 2 == 0:
