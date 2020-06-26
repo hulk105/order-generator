@@ -1,19 +1,13 @@
-import logging
-import configparser
 from generators import *
-
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-config = configparser.ConfigParser()
-config.read('config.ini')
+from mylogging import logger
+from myconfigparser import config
 
 # DICT KEYS
 first_entry = 'first_entry'
 step = 'step'
 multiplier = 'multiplier'
 max_entries = 'max_entries'
+values = 'values'
 
 ORDERS = [[] for i in range(config.getint('CONSTANTS', 'ITERATIONS'))]
 
@@ -30,6 +24,17 @@ if __name__ == '__main__':
             config.getint('ORDER_ID', max_entries),
             i,
         ))
+
+        # Provider ID
+        ORDERS[i].append(generate_provider_id(
+            config.getint('PROVIDER_ID', first_entry),
+            config.getfloat('PROVIDER_ID', step),
+            config.getfloat('PROVIDER_ID', multiplier),
+            config.getint('PROVIDER_ID', max_entries),
+            i,
+            config.get('PROVIDER_ID', values).split()
+        ))
+
 
 for order in ORDERS:
     logger.info(order)

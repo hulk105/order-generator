@@ -1,5 +1,7 @@
 import unittest
 import generators
+from mylogging import logger
+from myconfigparser import config
 
 
 class OrderIdGeneratorTest(unittest.TestCase):
@@ -15,3 +17,6 @@ class ProviderIdGeneratorTest(unittest.TestCase):
 class DirectionGeneratorTest(unittest.TestCase):
     def test(self):
         self.assertEqual(generators.generate_direction(0, 0.76473, 1.333, 1, 1, ['Buy', 'Sell']), 'Sell')
+
+
+print(config.get('PROVIDER_ID', 'values').split())

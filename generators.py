@@ -8,12 +8,7 @@ max_entries - max entry
 
 import math
 import random
-import logging
 
-# Initiate logger
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.DEBUG)
-logger = logging.getLogger(__name__)
 
 # DICT KEYS
 first_entry = 'first_entry'
