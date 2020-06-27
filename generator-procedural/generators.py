@@ -21,11 +21,24 @@ def lcg(first_entry, step, multiplier, max_entry, iteration):
         return next_entry
 
 
+def generate_random_number(first_entry, step, multiplier, max_entry, iteration, round_result=False):
+    lcg_result = lcg(first_entry, step, multiplier, max_entry, iteration)
+    if round_result is True:
+        return round(lcg_result)
+    else:
+        return lcg_result
+
+
+def generate_random_value_from_list(first_entry, step, multiplier, max_entry, iteration, values):
+    lcg_result = lcg(first_entry, step, multiplier, max_entry, iteration)
+    return values[round(lcg_result)]
+
+
 def generate_order_id(first_entry, step, multiplier, max_entry, iteration):
     lcg_result = lcg(first_entry, step, multiplier, max_entry, iteration)
 
     # Format to hex
-    return format(lcg_result, 'x')
+    return format(round(lcg_result), 'x')
 
 
 def generate_provider_id(first_entry, step, multiplier, max_entry, iteration, values):
