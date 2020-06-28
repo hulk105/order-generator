@@ -2,6 +2,7 @@ import unittest
 from generators import *
 from myconfigparser import config
 from constants import *
+import itertools as it
 
 # DICT KEYS
 first_entry = 'first_entry'
@@ -10,20 +11,9 @@ multiplier = 'multiplier'
 max_entry = 'max_entry'
 values = 'values'
 
-for i in range(300):
-    print(generate_random_number(
-        first_entry=config[CURRENCY_PAIR]['delta1'][FIRST_ENTRY].get(int),
-        step=config[CURRENCY_PAIR]['delta1'][STEP].get(float),
-        multiplier=config[CURRENCY_PAIR]['delta1'][MULTIPLIER].get(float),
-        max_entry=config[CURRENCY_PAIR]['delta1'][MAX_ENTRY].get(float),
-        iteration=i,
-    ), generate_random_number(
-        first_entry=config[CURRENCY_PAIR]['delta2'][FIRST_ENTRY].get(int),
-        step=config[CURRENCY_PAIR]['delta2'][STEP].get(float),
-        multiplier=config[CURRENCY_PAIR]['delta2'][MULTIPLIER].get(float),
-        max_entry=config[CURRENCY_PAIR]['delta2'][MAX_ENTRY].get(float),
-        iteration=i,
-    ))
+
+for i in it.chain(range(30, 52), range(1, 18)):
+    print(i)
 
 
 class OrderIdGeneratorTest(unittest.TestCase):
