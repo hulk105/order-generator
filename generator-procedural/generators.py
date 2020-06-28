@@ -7,6 +7,7 @@ max_entry - max entry
 '''
 
 from mylogging import logger
+from decimal import *
 
 
 def lcg(first_entry, step, multiplier, max_entry, iteration):
@@ -29,9 +30,13 @@ def generate_random_number(first_entry, step, multiplier, max_entry, iteration, 
         return lcg_result
 
 
-def generate_random_value_from_list(first_entry, step, multiplier, max_entry, iteration, values):
+def generate_random_value_from_list(first_entry, step, multiplier, iteration, values, max_entry=0):
+    max_entry = len(values) - 1
     lcg_result = lcg(first_entry, step, multiplier, max_entry, iteration)
-    return values[round(lcg_result)]
+    try:
+        return values[round(lcg_result)]
+    except IndexError as e:
+        logger.error(e)
 
 
 def generate_order_id(first_entry, step, multiplier, max_entry, iteration):
