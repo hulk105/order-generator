@@ -1,6 +1,7 @@
-import configparser
+"""
+Get config by folder name at /home/user/.config/CONFIG_FOLDER
+"""
 import confuse
-from pathlib import Path
 
 
 config = confuse.Configuration('order-generator-procedural')

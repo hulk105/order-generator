@@ -1,13 +1,18 @@
-'''
-first_entry - first entry
-multiplier - coeff
-step - step
-max_entry - max entry
+"""
+Linear congruent sequence:
+X_1 = (X * a + c) % m
+X - first entry
+a - coeff
+c - step
+m - max entry
 549755813887 = 7FFFFFFFFF
-'''
+"""
 
 from mylogging import logger
-from decimal import *
+import random
+import constants as const
+
+random.seed(const.SEED)
 
 
 def lcg(first_entry, step, multiplier, max_entry, iteration):

@@ -2,7 +2,7 @@ import random
 
 from mylogging import logger
 from myconfigparser import config
-from generators import *
+from lcg_generator import *
 from constants import *
 from decimal import *
 
