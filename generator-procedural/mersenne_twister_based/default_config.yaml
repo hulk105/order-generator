@@ -1,11 +1,13 @@
-# Integer only
-SEED: 5243987
+LOG_LEVEL: DEBUG
+
 ITERATIONS: 2000
+SEED: 5243987
 
 ORDER_ID:
   first_entry: 254781069873
   step: 1354
   multiplier: 1
+  # 549755813887 decimal = 7FFFFFFFFF hex
   max_entry: 549755813887
 
 PROVIDER_ID:
@@ -65,12 +67,9 @@ CURRENCY_PAIR:
     multiplier: 1.03
     max_entry: 9999.99
 
-STATUS:
+ZONES:
   RED:
-    first_entry: 1
-    step: 1.56
-    multiplier: 1.33
-    values:
+    statuses:
       - - To Provider
         - Rejected
       - - To Provider
@@ -83,7 +82,7 @@ STATUS:
       - - To Provider
         - Partially Filled
   GREEN:
-    values:
+    statuses:
       - - New
         - To Provider
         - Partially Filled
@@ -98,7 +97,7 @@ STATUS:
         - To Provider
         - Rejected
   BLUE:
-    values:
+    statuses:
       - - New
       - - New
         - To Provider
