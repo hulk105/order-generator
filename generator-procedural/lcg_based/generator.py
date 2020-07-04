@@ -7,7 +7,7 @@ c - step
 m - max entry
 """
 
-from mylogging import logger
+from custom_logger import logger
 
 
 def lcg(first_entry, step, multiplier, max_entry, iteration):
