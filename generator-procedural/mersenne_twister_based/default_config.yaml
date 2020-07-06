@@ -1,35 +1,21 @@
-LOG_LEVEL: INFO
+LOG_LEVEL: info
 
-ITERATIONS: 2000
-SEED: 5243987
+SEED: 7615342013574015
 
-ORDER_ID:
-  first_entry: 254781069873
-  step: 1354
-  multiplier: 1
-  # 549755813887 decimal = 7FFFFFFFFF hex
-  max_entry: 549755813887
+INITIAL_ORDER_ID: 254781069873
 
 PROVIDER_ID:
-  first_entry: 0
-  step: 0.33
-  multiplier: 1.333
   values:
     - SQM
     - FXCM
 
 DIRECTION:
-  first_entry: 0
-  step: 0.77
-  multiplier: 1.333
   values:
     - Buy
     - Sell
 
 CURRENCY_PAIR:
-  first_entry: 0
-  step: 0.77
-  multiplier: 1.333
+  delta: 0.00005
   values:
     - "EUR/USD": 1.120199
     - "GBP/USD": 1.304649
@@ -51,24 +37,11 @@ CURRENCY_PAIR:
     - "NZD/CAD": 0.861681
     - "NZD/CHF": 0.631029
     - "NZD/JPY": 71.310905
-  delta:
-    first_entry: 0
-    step: 0.000023
-    multiplier: 1.000033
-    max_entry: 0.000999
-  delta_partially_filled:
-    first_entry: 0
-    step: 0.000076
-    multiplier: 1.000077
-    max_entry: 0.000999
-  px_vol:
-    first_entry: 456.32
-    step: 23
-    multiplier: 1.03
-    max_entry: 9999.99
 
 ZONES:
   RED:
+    initial_date: '2020-06-05 15:27:45.354354'
+    orders_count: 300
     statuses:
       - - To Provider
         - Rejected
@@ -81,7 +54,10 @@ ZONES:
         - Filled
       - - To Provider
         - Partially Filled
+
   GREEN:
+    initial_date: '2020-06-06 07:00:45.465874'
+    orders_count: 1100
     statuses:
       - - New
         - To Provider
@@ -92,11 +68,14 @@ ZONES:
         - Filled
       - - New
         - To Provider
-        - Partially filled
+        - Partially Filled
       - - New
         - To Provider
         - Rejected
+
   BLUE:
+    initial_date: '2020-06-07 07:00:05.154784'
+    orders_count: 600
     statuses:
       - - New
       - - New
@@ -104,6 +83,3 @@ ZONES:
       - - New
         - To Provider
         - Partially Filled
-
-DATE:
-  first_entry:

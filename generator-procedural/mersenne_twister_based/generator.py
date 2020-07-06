@@ -1,11 +1,23 @@
-import math
-import random
-from mersenne_twister_based import settings
+import datetime
 import logging
+import random
+
+from mersenne_twister_based import settings
 
 random.seed(settings.SEED)
-
 orders = []
+
+
+def benchmark(func):
+    import time
+
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        return_value = func(*args, **kwargs)
+        end = time.time()
+        logging.info('Finished in: %s ms.' % str(end - start))
+        return return_value
+    return wrapper
 
 
 def random_sequence(first_entry, iterations, step_range_start, step_range_stop):
@@ -22,39 +34,98 @@ def random_sequence(first_entry, iterations, step_range_start, step_range_stop):
     return result
 
 
+@benchmark
 def generate_orders_by_mersenne_twister(zones):
     for zone in zones:
         generate_orders_for_zone(zone)
 
 
 def generate_orders_for_zone(zone):
-    # Initial
+
+    # Initial order_id
     order_id = settings.INITIAL_ORDER_ID
+
+    # Initial date
+    creation_date = datetime.datetime.strptime(settings.INITIAL_DATE[zone], settings.DATE_FORMAT)
+    hour_range = 24 - creation_date.hour
+
+    # Log possible statuses for zone
     logging.info('Generating orders for %s zone' % zone)
     logging.debug('Possible statuses for %s zone:' % zone)
     for statuses in settings.POSSIBLE_STATUSES[zone]:
         logging.debug(str(statuses))
 
+    # Begin iterating
+    logging.debug('Iterating')
     for i in range(settings.ORDERS_COUNT[zone]):
-        logging.debug(i)
-        logging.debug(order_id)
+        logging.debug('Iteration %s:' % str(i))
+        logging.debug('Order ID %s:' % str(order_id))
 
-        # provider_id = random.choice(settings.PROVIDER_ID)
-        if random.randint(0, 1000) % 2 == 0:
-            provider_id = settings.PROVIDER_ID[0]
+        # Random Provider ID
+        provider_id = random.choice(settings.PROVIDER_ID)
+
+        # Random Direction
+        direction = random.choice(settings.DIRECTION)
+
+        # Random Currency Pair as a list ["CUR/CUR, 9.999999"]
+        currency_pair = list(random.choice(settings.CURRENCY_PAIR).items())[0]
+        logging.debug('Currency pair: %s' % str(currency_pair))
+
+        # Initial Price
+        px_init = currency_pair[1]
+
+        # Random delta for each iteration
+        delta = random.triangular(0.000001, 0.00001)
+        if random.randint(0, 1) == 0:
+            px_delta = round(px_init + delta, 6)
+            logging.debug('%s + %s = %s' % (px_init, delta, px_delta))
         else:
-            provider_id = settings.PROVIDER_ID[1]
+            px_delta = round(px_init - delta, 6)
+            logging.debug('%s + %s = %s' % (px_init, delta, px_delta))
 
-        # Get random statuses from status list
+        # Random Vol
+        vol = random.randint(1, 1000) + random.random()
+
+        # Random statuses from possible status list
         statuses = random.choice(settings.POSSIBLE_STATUSES[zone])
+
+        # Status dependent fields
         for status in statuses:
             logging.debug(status)
+
+            # Partially filled delta
+            if status == 'Partially Filled':
+                if random.randint(0, 1) == 0:
+                    px_delta = round(px_init + delta, 6)
+                    logging.debug('%s + %s = %s' % (px_init, delta, px_delta))
+                else:
+                    px_delta = round(px_init - delta, 6)
+                    logging.debug('%s + %s = %s' % (px_init, delta, px_delta))
+
+            # Vol = 0 if status is Rejected
+            if status == 'Rejected':
+                vol = 0
+
+            # Result Order
             order = [
                 i,
                 hex(order_id),
                 provider_id,
-                status
+                direction,
+                currency_pair[0],
+                px_delta,
+                round(vol * px_delta, 6),
+                str(creation_date),
+                status,
+
             ]
             logging.info(order)
+
+            # Append to result List of Orders
             orders.append(order)
+
+        # Add random to these values to next iteration
         order_id += random.randint(100, 600)
+        creation_date += datetime.timedelta(
+            microseconds=3600000000*hour_range/settings.ORDERS_COUNT[zone]+random.randint(1, 1000000)
+        )
