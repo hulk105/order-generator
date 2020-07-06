@@ -49,6 +49,7 @@ try:
     DIRECTION = config_parser['DIRECTION'][values].get()
     CURRENCY_PAIR = config_parser['CURRENCY_PAIR'][values].get()
     CURRENCY_PAIR_DELTA = config_parser['CURRENCY_PAIR'][delta].get(float)
+    TAGS = config_parser['TAGS'][values].get()
 
 
 except KeyError as e:
