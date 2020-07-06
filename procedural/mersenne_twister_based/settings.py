@@ -20,7 +20,7 @@ try:
     BLUE = 'BLUE'
 
     # Constants
-    SEED = config_parser['SEED'].get(int)
+    SEED = config_parser['SEED'].get()
 
     ZONES = config_parser['ZONES'].get()
 

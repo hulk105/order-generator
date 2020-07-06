@@ -26,7 +26,7 @@ def setup_logger():
     try:
         logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                         level=logging_levels[LOG_LEVEL.upper()])
-        logging.info('Logging level set to: %s', LOG_LEVEL)
+        logging.info('Logging level set to: %s', LOG_LEVEL.upper())
     except KeyError:
         logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                         level=logging.INFO)

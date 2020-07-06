@@ -1,6 +1,6 @@
 LOG_LEVEL: info
 
-SEED: 7615342013574015
+SEED:
 
 INITIAL_ORDER_ID: 254781069873
 
@@ -83,3 +83,27 @@ ZONES:
       - - New
         - To Provider
         - Partially Filled
+
+TAGS:
+  values:
+    - COMP
+    - DJIA
+    - DJT
+    - DJU
+    - GDOW
+    - IXCO
+    - MID
+    - NDX
+    - NYA
+    - OEX
+    - PSE
+    - RUI
+    - RUT
+    - SOX
+    - SPX
+    - XX:TNX
+    - XX:TYX
+    - XAU
+    - XAX
+    - XMI
+    - XX:XOI
