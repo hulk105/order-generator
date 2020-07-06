@@ -1,9 +1,6 @@
 import sys
-
+import logging
 from config import config_parser
-from custom_logger import setup_custom_logger
-
-logger = setup_custom_logger(__name__)
 
 try:
     # Dictionary key strings
@@ -13,11 +10,10 @@ try:
     MAX_ENTRY = 'max_entry'
     VALUES = 'values'
     STATUSES = 'statuses'
+    orders_count = 'orders_count'
 
     # Categories strings
     ORDER_ID = 'ORDER_ID'
-    PROVIDER_ID = 'PROVIDER_ID'
-    DIRECTION = 'DIRECTION'
     CURRENCY_PAIR = 'CURRENCY_PAIR'
 
     ZONE = 'ZONE'
@@ -26,10 +22,10 @@ try:
     BLUE = 'BLUE'
 
     # Constants
-    ITERATIONS = config_parser['ITERATIONS'].get(int)
-
     SEED = config_parser['SEED'].get(int)
-
+    INITIAL_ORDER_ID = config_parser['INITIAL_ORDER_ID'].get(int)
+    PROVIDER_ID = config_parser['PROVIDER_ID'][VALUES].get()
+    DIRECTION = config_parser['DIRECTION'][VALUES].get()
     ZONES = config_parser['ZONES'].get()
 
     POSSIBLE_STATUSES = {
@@ -37,7 +33,15 @@ try:
         GREEN: ZONES[GREEN][STATUSES],
         BLUE: ZONES[BLUE][STATUSES]
     }
+
+    ORDERS_COUNT = {
+        RED: ZONES[RED][orders_count],
+        GREEN: ZONES[GREEN][orders_count],
+        BLUE: ZONES[BLUE][orders_count]
+    }
+
+
 except KeyError as e:
-    logger.critical('Key ' + str(e) + ' not specified in config')
-    logger.warning('Exiting')
+    logging.critical('Key ' + str(e) + ' not specified in config')
+    logging.warning('Exiting')
     sys.exit(1)

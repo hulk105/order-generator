@@ -1,10 +1,11 @@
+import math
 import random
 from mersenne_twister_based import settings
-from custom_logger import setup_custom_logger
+import logging
 
-logger = setup_custom_logger(__name__)
 random.seed(settings.SEED)
-ORDERS = []
+
+orders = []
 
 
 def random_sequence(first_entry, iterations, step_range_start, step_range_stop):
@@ -23,11 +24,37 @@ def random_sequence(first_entry, iterations, step_range_start, step_range_stop):
 
 def generate_orders_by_mersenne_twister(zones):
     for zone in zones:
-        generate_order_for_zone(zone)
+        generate_orders_for_zone(zone)
 
 
-def generate_order_for_zone(zone):
-    logger.info('Generating orders for %s zone' % zone)
-    logger.info('Possible statuses for %s zone:' % zone)
+def generate_orders_for_zone(zone):
+    # Initial
+    order_id = settings.INITIAL_ORDER_ID
+    logging.info('Generating orders for %s zone' % zone)
+    logging.debug('Possible statuses for %s zone:' % zone)
     for statuses in settings.POSSIBLE_STATUSES[zone]:
-        logger.info(str(statuses))
+        logging.debug(str(statuses))
+
+    for i in range(settings.ORDERS_COUNT[zone]):
+        logging.debug(i)
+        logging.debug(order_id)
+
+        # provider_id = random.choice(settings.PROVIDER_ID)
+        if random.randint(0, 1000) % 2 == 0:
+            provider_id = settings.PROVIDER_ID[0]
+        else:
+            provider_id = settings.PROVIDER_ID[1]
+
+        # Get random statuses from status list
+        statuses = random.choice(settings.POSSIBLE_STATUSES[zone])
+        for status in statuses:
+            logging.debug(status)
+            order = [
+                i,
+                hex(order_id),
+                provider_id,
+                status
+            ]
+            logging.info(order)
+            orders.append(order)
+        order_id += random.randint(100, 600)

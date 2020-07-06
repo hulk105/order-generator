@@ -1,20 +1,9 @@
-import sys
 import logging
-import confuse
-from config import config_parser
 
 try:
     import colorlog
 except ImportError:
     pass
-
-# Get logging level from config
-try:
-    LOGGING_LEVEL = str(config_parser['LOG_LEVEL'].get())
-except confuse.NotFoundError:
-    logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
-    logging.getLogger(__name__).error('Config not found')
-    sys.exit(1)
 
 logging_levels = {
     'CRITICAL': logging.CRITICAL,
@@ -23,6 +12,11 @@ logging_levels = {
     'INFO': logging.INFO,
     'DEBUG': logging.DEBUG,
 }
+
+
+def setup_logger():
+    logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                        level=logging.INFO)
 
 
 def setup_custom_logger(name):

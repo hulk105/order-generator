@@ -1,8 +1,11 @@
 from mersenne_twister_based import settings
-from mersenne_twister_based.generator import generate_orders_by_mersenne_twister, ORDERS
-from custom_logger import setup_custom_logger
+from mersenne_twister_based.generator import generate_orders_by_mersenne_twister, orders
+from custom_logger import setup_logger, setup_custom_logger
+import logging
 
 if __name__ == '__main__':
+    setup_logger()
+    logging.info('%s started', __name__)
     generate_orders_by_mersenne_twister(settings.ZONES)
 
-    setup_custom_logger(__name__).info('Total orders generated: ' + str(len(ORDERS)))
+    logging.info('Total orders generated: ' + str(len(orders)))
