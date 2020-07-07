@@ -14,9 +14,10 @@ else:
     logger.warning('Random seed not specified, using datetime.now')
 
 orders_history = []
-orders = Table('orders')
 
-sql_dump = open('generator_dump.sql', 'w')
+orders = Table('orders')
+sql_dump = open('order_history_dump.sql', 'w')
+
 
 def benchmark(func):
     import time
