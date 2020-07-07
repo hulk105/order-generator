@@ -1,19 +1,22 @@
 import datetime
-import logging
 import random
 import hashlib
 
 from pypika import Table, Query
 
-from mersenne_twister_based import settings
+from logger import logger
+from mersenne_twister_based import generator_properties
 
-if settings.SEED is not None:
-    random.seed(settings.SEED)
+if generator_properties.SEED is not None:
+    random.seed(generator_properties.SEED)
+    logger.info('Random seed: %s' % generator_properties.SEED)
+else:
+    logger.warning('Random seed not specified, using datetime.now')
 
 orders_history = []
-
 orders = Table('orders')
 
+sql_dump = open('generator_dump.sql', 'w')
 
 def benchmark(func):
     import time
@@ -22,8 +25,9 @@ def benchmark(func):
         start = time.time()
         return_value = func(*args, **kwargs)
         end = time.time()
-        logging.info('Finished in: %s ms.' % str(end - start))
+        logger.info('Finished in: %s ms.' % str(end - start))
         return return_value
+
     return wrapper
 
 
@@ -35,33 +39,37 @@ def generate_order_history(zones):
 
 def generate_orders_for_zone(zone):
     # Log possible statuses for zone
-    logging.info('Generating orders for %s zone' % zone)
-    logging.debug('Possible statuses for %s zone:' % zone)
-    for statuses in settings.POSSIBLE_STATUSES[zone]:
-        logging.debug(str(statuses))
+    logger.info('Generating orders for %s zone' % zone)
+    logger.debug('Possible statuses for %s zone:' % zone)
+    for statuses in generator_properties.POSSIBLE_STATUSES[zone]:
+        logger.debug(str(statuses))
 
     # Initial order_id
-    order_id = settings.INITIAL_ORDER_ID
+    order_id = generator_properties.INITIAL_ORDER_ID
 
     # Initial date
-    creation_date = datetime.datetime.strptime(settings.INITIAL_DATE[zone], settings.DATE_FORMAT)
+    creation_date = datetime.datetime.strptime(generator_properties.INITIAL_DATE[zone],
+                                               generator_properties.DATE_FORMAT)
+    # Hour range for timedelta
     hour_range = 23 - creation_date.hour
 
+    orders_in_zone_count = 0
+
     # Begin iterating
-    logging.debug('Iterating')
-    for i in range(settings.ORDERS_COUNT[zone]):
-        logging.debug('Iteration %s:' % str(i))
-        logging.debug('Order ID %s:' % str(order_id))
+    logger.debug('Iterating')
+    for i in range(generator_properties.ORDERS_COUNT[zone]):
+        logger.debug('Iteration %s:' % str(i))
+        logger.debug('Order ID %s' % str(order_id))
 
         # Random Provider ID
-        provider_id = random.choice(settings.PROVIDER_ID)
+        provider_id = random.choice(generator_properties.PROVIDER_ID)
 
         # Random Direction
-        direction = random.choice(settings.DIRECTION)
+        direction = random.choice(generator_properties.DIRECTION)
 
         # Random Currency Pair as a list ["CUR/CUR, 9.999999"]
-        currency_pair = list(random.choice(settings.CURRENCY_PAIR).items())[0]
-        logging.debug('Currency pair: %s' % str(currency_pair))
+        currency_pair = list(random.choice(generator_properties.CURRENCY_PAIR).items())[0]
+        logger.debug('Currency pair: %s' % str(currency_pair))
 
         # Initial Price
         px_init = currency_pair[1]
@@ -73,13 +81,13 @@ def generate_orders_for_zone(zone):
         vol = random.randint(1, 1000) + random.random()
 
         # Random statuses from possible status list
-        statuses = random.choice(settings.POSSIBLE_STATUSES[zone])
+        statuses = random.choice(generator_properties.POSSIBLE_STATUSES[zone])
 
         # Initiate change date before status change
         change_date = creation_date
 
         # Generate random tags sample from tags list
-        tags = random.sample(settings.TAGS, random.randint(1, 4))
+        tags = random.sample(generator_properties.TAGS, random.randint(1, 4))
 
         description = None
 
@@ -87,7 +95,7 @@ def generate_orders_for_zone(zone):
 
         # Changing status dependent fields
         for status in statuses:
-            logging.debug(status)
+            logger.debug('Status: %s' % status)
 
             # Partially filled Price delta
             if status == 'Partially Filled':
@@ -116,22 +124,26 @@ def generate_orders_for_zone(zone):
                 description,
                 extra_data
             ]
-            logging.debug(order)
+            logger.debug(order)
 
             # Append to result List of orders
             orders_history.append(order)
 
+            orders_in_zone_count += 1
+
             # Generate DB query
             query = Query.into(orders).insert(*order)
-            logging.debug(query)
+            logger.debug(query)
+            sql_dump.write(str(query) + '\n')
 
         # Add random to these values up to next iteration
         order_id += random.randint(100, 600)
         creation_date += datetime.timedelta(
             # 3,600 s * 1,000,000 μs * hours range in zone / orders count in zone + random (1 - 1,000,000 μs)
-            microseconds=3600*1000000*hour_range/settings.ORDERS_COUNT[zone]+random.randint(1, 100000)
+            microseconds=3600 * 1000000 * hour_range / generator_properties.ORDERS_COUNT[zone] + random.randint(1,
+                                                                                                                100000)
         )
-    logging.info('DONE - Generated %s orders for %s zone' % (len(orders_history), zone))
+    logger.info('DONE - Generated %s orders for %s zone' % (orders_in_zone_count, zone))
 
 
 def random_delta(range_min, range_max, value):
@@ -144,6 +156,3 @@ def random_delta(range_min, range_max, value):
 
 def generate_extra_data(*args):
     return hashlib.sha1(bytes(*args)).hexdigest()
-
-
-

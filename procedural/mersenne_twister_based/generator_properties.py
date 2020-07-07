@@ -1,7 +1,7 @@
 import sys
-import logging
 
-from config import config_parser
+from config_parser import config_parser
+from logger import logger
 
 try:
     # Dictionary key strings
@@ -53,6 +53,6 @@ try:
 
 
 except KeyError as e:
-    logging.critical('Key ' + str(e) + ' not specified in config')
-    logging.warning('Exiting')
+    logger.critical('Key ' + str(e) + ' not specified in config')
+    logger.warning('Exiting')
     sys.exit(1)
