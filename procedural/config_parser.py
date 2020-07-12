@@ -1,8 +1,9 @@
 """
 Confuse searches for config.yaml at /home/user/.config/<APP_NAME>
 """
-import confuse
 import logging
+
+import confuse
 
 APP_NAME = 'order-generator-procedural'
 

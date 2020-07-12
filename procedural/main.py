@@ -1,8 +1,31 @@
-from mersenne_twister_based import generator_properties
-from mersenne_twister_based.generator import generate_order_history, orders_history
+import logging
+
 from logger import logger
+from mersenne_twister_based import generator
+
+
+def init():
+    pass
+
+
+def setup():
+    logger.info('Log level set up to %s' % logging.getLevelName(logger.level))
+
+
+def workflow():
+    logger.info('%s started', __name__)
+    try:
+        generator.set_random_seed()
+        generator.generate_order_history()
+    except Exception as e:
+        logger.error(e)
+
+
+def result():
+    generator.show_total()
+
 
 if __name__ == '__main__':
-    logger.info('%s started', __name__)
-    generate_order_history(generator_properties.ZONES)
-    logger.info('Total orders generated: ' + str(len(orders_history)))
+    init()
+    setup()
+    workflow()
