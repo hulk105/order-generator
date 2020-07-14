@@ -1,5 +1,5 @@
 """
-Confuse searches for config.yaml at /home/user/.config/<APP_NAME>
+Confuse searches for config.yaml at /home/user/.config/<APP_NAME/>
 """
 import logging
 import sys
@@ -20,6 +20,9 @@ config_parser = confuse.Configuration(APP_NAME, __name__)
 
 if Path(config_parser.config_dir(), confuse.CONFIG_FILENAME).is_file():
     config_logger.info('Config at %s/%s' % (config_parser.config_dir(), confuse.CONFIG_FILENAME))
+
+    # TODO Create default config in config_dir() path
+
 else:
-    config_logger.error('Config not found at %s' % (config_parser.config_dir()))
+    config_logger.fatal('Config not found at %s' % (config_parser.config_dir()))
     sys.exit(1)

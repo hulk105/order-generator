@@ -1,8 +1,8 @@
 # Possible values: debug, info, warning, error, critical
-LOG_LEVEL: info
+LOG_LEVEL: info4
 
 # Seed must be integer only, or empty
-SEED:
+SEED: 256071
 
 # Integer only
 INITIAL_ORDER_ID: 254781069873
@@ -40,6 +40,8 @@ CURRENCY_PAIR:
     - "NZD/CAD": 0.861681
     - "NZD/CHF": 0.631029
     - "NZD/JPY": 71.310905
+
+# ZONES date format - 'YYYY-mm-dd HH:MM:SS.f'
 
 ZONES:
   RED:

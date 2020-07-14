@@ -1,10 +1,7 @@
 import logging
 
-import confuse
-
 from logger import logger
 from mersenne_twister_based import generator
-from config_parser import config_parser
 
 
 def init():
@@ -20,6 +17,7 @@ def workflow():
     try:
         generator.set_random_seed()
         generator.generate_order_history()
+        generator.write_sql_dump()
     except Exception as e:
         logger.error(e)
 

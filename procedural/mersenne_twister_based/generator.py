@@ -1,6 +1,7 @@
 import datetime
 import hashlib
 import random
+import gc
 
 from pypika import Table, Query
 
@@ -9,10 +10,10 @@ from logger import logger
 
 orders_history = []
 orders_table = Table('orders')
-sql_dump = open('order_history_dump.sql', 'w')
+sql_dump_file = open('order_history_dump.sql', 'w')
 
 
-def benchmark(func):
+def benchmark_function(func):
     import time
 
     def wrapper(*args, **kwargs):
@@ -33,7 +34,7 @@ def set_random_seed() -> None:
         logger.warning('Random seed not specified, using current datetime microseconds')
 
 
-@benchmark
+@benchmark_function
 def generate_order_history() -> None:
     for zone in properties.ZONES:
         generate_orders_for_zone(zone)
@@ -44,26 +45,31 @@ def show_total():
 
 
 def generate_orders_for_zone(zone):
-    # Log possible statuses for zone
     logger.info('Generating orders for %s zone' % zone)
+
+    # Log possible statuses
     logger.debug('Possible statuses for %s zone:' % zone)
-    for statuses in properties.POSSIBLE_STATUSES[zone]:
+    for statuses in properties.ZONES[zone][properties.statuses]:
         logger.debug(str(statuses))
 
     # Initial order_id
     order_id = properties.INITIAL_ORDER_ID
 
     # Parse Initial date
-    creation_date = datetime.datetime.strptime(properties.INITIAL_DATE[zone],
+    creation_date = datetime.datetime.strptime(properties.ZONES[zone][properties.initial_date],
                                                properties.DATE_FORMAT)
+
+    end_date = datetime.datetime.strptime(properties.ZONES[zone][properties.end_date],
+                                          properties.DATE_FORMAT)
+
     # Hour range for timedelta
-    hour_range = 23 - creation_date.hour
+    time_range = (end_date - creation_date) / properties.ZONES[zone][properties.orders_count]
 
     orders_in_zone_count = 0
 
     # Begin iterating
     logger.debug('Iterating')
-    for i in range(properties.ORDERS_COUNT[zone]):
+    for i in range(properties.ZONES[zone][properties.orders_count]):
         logger.debug('Iteration %s:' % str(i))
         logger.debug('Order ID %s' % str(order_id))
 
@@ -87,7 +93,7 @@ def generate_orders_for_zone(zone):
         vol = random.randint(1, 1000) + random.random()
 
         # Random statuses from possible status list
-        statuses = random.choice(properties.POSSIBLE_STATUSES[zone])
+        statuses = random.choice(properties.ZONES[zone][properties.statuses])
 
         # Initiate change date before status change
         change_date = creation_date
@@ -103,17 +109,19 @@ def generate_orders_for_zone(zone):
         for status in statuses:
             logger.debug('Status: %s' % status)
 
-            # Partially filled Price delta
+            if status != 'New':
+                # Add random time delta (30s - 5m) for every new status if it is not New
+                # TODO !!! This has to consider orders time dispersion for 50k+ iterations,
+                #  otherwise the date sequence in a single order will be invalid
+                change_date += datetime.timedelta(microseconds=random.randint(30000000, 300000000))
+
+            # Partially filled Price +- delta
             if status == 'Partially Filled':
                 px_delta = round(random_delta(0.000001, 0.00001, px_init), 6)
 
             # Vol = 0 if status is Rejected
             if status == 'Rejected':
                 vol = 0
-
-            if status != 'New':
-                # Add random time delta (30s - 5m) for every new status if not New
-                change_date += datetime.timedelta(microseconds=random.randint(30000000, 300000000))
 
             # Result Order
             order = [
@@ -135,20 +143,16 @@ def generate_orders_for_zone(zone):
             # Append to result List of orders
             orders_history.append(order)
 
+            # Count order
             orders_in_zone_count += 1
-
-            # Generate DB query
-            query = Query.into(orders_table).insert(*order)
-            logger.debug(query)
-            sql_dump.write(str(query) + '\n')
 
         # Add random to these values up to next iteration
         order_id += random.randint(100, 600)
-        creation_date += datetime.timedelta(
-            # 3,600 s * 1,000,000 μs * hours range in zone / orders count in zone + random (1 - 1,000,000 μs)
-            microseconds=3600 * 1000000 * hour_range / properties.ORDERS_COUNT[zone] + random.randint(1,
-                                                                                                      100000)
-        )
+        # creation_date += datetime.timedelta(
+        #     # 3,600 s * 1,000,000 μs * hours range in zone / orders count in zone + random (1 - 1,000,000 μs)
+        #     microseconds=3600 * hour_range * 1000000 / properties.ORDERS_COUNT[zone] + random.randint(1, 100000)
+        # )
+        creation_date += time_range
     logger.info('DONE - Generated %s orders for %s zone' % (orders_in_zone_count, zone))
 
 
@@ -162,3 +166,13 @@ def random_delta(range_min, range_max, value):
 
 def generate_extra_data(*args):
     return hashlib.sha1(bytes(*args)).hexdigest()
+
+
+@benchmark_function
+def write_sql_dump():
+    logger.info('Writing SQL dump through %s' % sql_dump_file)
+    for order in orders_history:
+        # Generate DB query
+        query = Query.into(orders_table).insert(*order)
+        logger.debug(query)
+        sql_dump_file.write(str(query) + '\n')

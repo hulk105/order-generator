@@ -10,9 +10,9 @@ log_levels = {
     'INFO': logging.INFO,
     'DEBUG': logging.DEBUG,
 }
-try:
-    LOG_LEVEL = log_levels.get(config_parser['LOG_LEVEL'].get().upper())
-except KeyError:
+LOG_LEVEL = log_levels.get(config_parser['LOG_LEVEL'].get().upper())
+
+if LOG_LEVEL is None:
     LOG_LEVEL = DEFAULT_LOG_LEVEL
 
 logger = logging.getLogger(APP_NAME)
