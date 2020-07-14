@@ -1,6 +1,7 @@
 import datetime
 import itertools
 import math
+import traceback
 
 from config_parser import config_parser
 import properties
@@ -47,7 +48,8 @@ print('seed:', seed)
 multiplier = seed_float - int(seed_float) + 1
 print('mul:', multiplier)
 
-sequence = []
+
+sequence = {}
 
 
 def lcg(min, max, first=None):
@@ -63,7 +65,12 @@ def lcg(min, max, first=None):
         current = next
 
 
-def randint(min, max, first=None):
+def initiate_sequence(*args):
+    sequence[len(sequence) + 1] = (iter(lcg(*args)))
+    return len(sequence) + 1, iter(lcg(*args))
+
+
+def randint(min: int, max: int, first=None):
     global sequence
     if sequence is None:
         sequence = iter(lcg(min, max))
@@ -75,11 +82,16 @@ def randint(min, max, first=None):
 def choice(list: list):
     global sequence
     if sequence is None:
-        sequence = iter(lcg(0, len(list) - 1))
+        sequence.append(iter(lcg(0, len(list) - 1)))
         return list[round(next(itertools.islice(sequence, sequence_offset, None)))]
     else:
         return list[round(next(sequence))]
 
 
-for _ in range(100):
-    print(randint(0, 1), randint(100, 1000), choice(['SQM', 'FXCM']), choice(['Buy', 'Sell']))
+# for _ in range(100):
+#     print(randint(0, 1), randint(100, 1000), choice(['SQM', 'FXCM']), choice(['Buy', 'Sell']))
+
+for _ in range(5):
+    print(id(get_digits_count(123)))
+    print(id(get_digits_count(12)))
+

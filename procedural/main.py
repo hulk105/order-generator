@@ -1,7 +1,10 @@
 import logging
 
+import confuse
+
 from logger import logger
 from mersenne_twister_based import generator
+from config_parser import config_parser
 
 
 def init():
@@ -29,3 +32,4 @@ if __name__ == '__main__':
     init()
     setup()
     workflow()
+    result()
