@@ -22,7 +22,10 @@ file_handler = logging.FileHandler('order_generator.log')
 file_handler.setLevel(LOG_LEVEL)
 file_handler.setFormatter(default_formatter)
 console_handler = logging.StreamHandler()
-console_handler.setLevel(DEFAULT_LOG_LEVEL)
+console_handler.setLevel(LOG_LEVEL)
 console_handler.setFormatter(default_formatter)
 logger.addHandler(file_handler)
 logger.addHandler(console_handler)
+
+logger.info('Log level set up to %s' % logging.getLevelName(logger.level))
+

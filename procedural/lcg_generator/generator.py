@@ -1,7 +1,9 @@
 import datetime
-import itertools
+import hashlib
 import math
 import properties
+
+from logger import logger
 
 
 def get_digit(number, n):
@@ -19,55 +21,76 @@ def get_digits_count(number):
 
 
 if properties.SEED is not None:
-    seed = properties.SEED
+    seed = int(hashlib.sha1(str(properties.SEED).encode('utf-8')).hexdigest(), 16) % (10 ** 8)
+    logger.debug('seed: %s' % properties.SEED)
 else:
     seed = datetime.datetime.now().microsecond
-print('seed:', seed)
+    logger.debug('seed: %s' % seed)
+
+logger.debug('seed hash: %s' % seed)
+
+random_step = get_digit(seed, 2)
+if random_step == 0 or random_step == 1:
+    random_step = 3
+logger.debug('random_step: %s' % random_step)
+
+sequence_offset = get_digit(seed, 1)
+logger.debug('sequence offset: %s' % sequence_offset)
 
 seed_as_float = seed
 seed_size = get_digits_count(seed)
-
-step_offset = get_digit(seed, 2)
-if step_offset == 0 or step_offset == 1:
-    step_offset = 3
-print('step offset:', step_offset)
-
-sequence_offset = get_digit(seed, 1)
-print('seq offset:', sequence_offset)
-
 while seed_size > 1:
     seed_as_float /= 10
     seed_size -= 1
-
-print('seed:', seed)
+logger.debug('seed float %s' % seed_as_float)
 
 multiplier = seed_as_float - int(seed_as_float) + 1
-print('mul:', multiplier)
+logger.debug('multiplier: %s' % multiplier)
 
 
-def lcg(min, max):
-    current = min
-    step = (min + max) / step_offset
-    print('Step:', step)
+def lcg(max):
+    current = seed
+    step = max // random_step
+    logger.debug('Step: %s' % step)
     while True:
         next = (current * multiplier + step) % max
-        if next < min:
-            yield next + min
-        else:
-            yield next
+        # print('next', next)
+        yield next
         current = next
 
 
-sequence = iter(lcg(0, seed))
+sequence = iter(lcg(seed))
 
 
 def randint(min: int, max: int):
-    result = round(next(itertools.islice(sequence, sequence_offset, None))) % (max + 1)
+    # result = round(next(itertools.islice(sequence, sequence_offset, None))) % (max + 1)
+    result = round(next(sequence)) % (max + 1)
     if result < min:
-        result += min
-    return result
+        return result + min
+    else:
+        return result
 
 
-def choice(list: list):
-    result = round(next(itertools.islice(sequence, sequence_offset, None))) % len(list)
-    return list[result]
+def randfloat(min: float, max: float):
+    # result = next(itertools.islice(sequence, sequence_offset, None)) % (max + 1)
+    result = next(sequence) % max
+    if result < min:
+        return result + min
+    else:
+        return result
+
+
+def choice(population: list):
+    # result = round(next(itertools.islice(sequence, sequence_offset, None))) % len(list)
+    result = round(next(sequence)) % len(population)
+    return population[result]
+
+
+def sample(population: list, k: int):
+    if k > len(population):
+        raise ValueError('k is more than list length.')
+    result_list = []
+    for i in range(k):
+        list_item = population[round(next(sequence)) % len(population)]
+        result_list.append(list_item)
+    return list(dict.fromkeys(result_list))

@@ -1,6 +1,5 @@
 import datetime
 import hashlib
-import random
 import gc
 
 from pypika import Table, Query
@@ -21,18 +20,10 @@ def benchmark_function(func):
         start = time.time()
         return_value = func(*args, **kwargs)
         end = time.time()
-        logger.info('Finished in: %s ms.' % str(end - start))
+        logger.info('Finished in %s ms.' % str(end - start))
         return return_value
 
     return wrapper
-
-
-def set_random_seed() -> None:
-    if properties.SEED is not None:
-        random.seed(properties.SEED)
-        logger.info('Random seed: %s' % properties.SEED)
-    else:
-        logger.warning('Random seed not specified, using current datetime microseconds')
 
 
 @benchmark_function
@@ -63,26 +54,22 @@ def generate_orders_for_zone(zone):
     end_date = datetime.datetime.strptime(properties.ZONES[zone][properties.end_date],
                                           properties.DATE_FORMAT)
 
-    # Hour range for timedelta
-    time_range = (end_date - creation_date) / properties.ZONES[zone][properties.orders_count]
+    # Time step for timedelta
+    time_step = (end_date - creation_date) / properties.ZONES[zone][properties.orders_count]
 
     orders_in_zone_count = 0
 
     # Begin iterating
-    logger.debug('Iterating')
     for i in range(properties.ZONES[zone][properties.orders_count]):
-        logger.debug('Iteration %s:' % str(i))
-        logger.debug('Order ID %s' % str(order_id))
 
         # Random Provider ID
-        provider_id = random.choice(properties.PROVIDER_ID)
+        provider_id = lcg.choice(properties.PROVIDER_ID)
 
         # Random Direction
-        direction = random.choice(properties.DIRECTION)
+        direction = lcg.choice(properties.DIRECTION)
 
         # Random Currency Pair as a list ["CUR/CUR, 9.999999"]
-        currency_pair = list(random.choice(properties.CURRENCY_PAIR).items())[0]
-        logger.debug('Currency pair: %s' % str(currency_pair))
+        currency_pair = list(lcg.choice(properties.CURRENCY_PAIR).items())[0]
 
         # Initial Price
         px_init = currency_pair[1]
@@ -91,16 +78,16 @@ def generate_orders_for_zone(zone):
         px_delta = round(random_delta(0.000001, 0.00001, px_init), 6)
 
         # Random Vol
-        vol = lcg.randint(1, 1000) + random.random()
+        vol = lcg.randfloat(1, 1000)
 
         # Random statuses from possible status list
-        statuses = random.choice(properties.ZONES[zone][properties.statuses])
+        statuses = lcg.choice(properties.ZONES[zone][properties.statuses])
 
         # Initiate change date before status change
         change_date = creation_date
 
         # Generate random tags sample from tags list
-        tags = random.sample(properties.TAGS, lcg.randint(1, 4))
+        tags = lcg.sample(properties.TAGS, lcg.randint(1, 4))
 
         description = None
 
@@ -108,12 +95,12 @@ def generate_orders_for_zone(zone):
 
         # Changing status dependent fields
         for status in statuses:
-            logger.debug('Status: %s' % status)
 
+            # TODO Nice hardcoded conditions
             if status != 'New':
                 # Add random time delta (30s - 5m) for every new status if it is not New
-                # TODO !!! This has to consider orders time dispersion for 50k+ iterations,
-                #  otherwise the date sequence in a single order will be invalid
+                # TODO !!! This has to consider orders time dispersion for several thousands
+                #  iterations, otherwise the date sequence in a single order will be invalid
                 change_date += datetime.timedelta(microseconds=lcg.randint(30000000, 300000000))
 
             # Partially filled Price +- delta
@@ -139,8 +126,6 @@ def generate_orders_for_zone(zone):
                 description,
                 extra_data
             ]
-            logger.debug(order)
-
             # Append to result List of orders
             orders_history.append(order)
 
@@ -153,12 +138,12 @@ def generate_orders_for_zone(zone):
         #     # 3,600 s * 1,000,000 μs * hours range in zone / orders count in zone + random (1 - 1,000,000 μs)
         #     microseconds=3600 * hour_range * 1000000 / properties.ORDERS_COUNT[zone] + lcg.randint(1, 100000)
         # )
-        creation_date += time_range
+        creation_date += time_step
     logger.info('DONE - Generated %s orders for %s zone' % (orders_in_zone_count, zone))
 
 
 def random_delta(range_min, range_max, value):
-    delta = random.triangular(range_min, range_max)
+    delta = lcg.randfloat(range_min, range_max)
     if lcg.randint(0, 1) == 0:
         return value + delta
     else:
@@ -171,9 +156,8 @@ def generate_extra_data(*args):
 
 @benchmark_function
 def write_sql_dump():
-    logger.info('Writing SQL dump through %s' % sql_dump_file)
+    logger.info('Writing SQL dump to %s as %s' % (sql_dump_file.name, sql_dump_file.encoding))
     for order in orders_history:
         # Generate DB query
         query = Query.into(orders_table).insert(*order)
-        logger.debug(query)
         sql_dump_file.write(str(query) + '\n')

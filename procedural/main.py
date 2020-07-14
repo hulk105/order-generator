@@ -9,13 +9,13 @@ def init():
 
 
 def setup():
-    logger.info('Log level set up to %s' % logging.getLevelName(logger.level))
+    # TODO Setup logger and config here
+    pass
 
 
 def workflow():
-    logger.info('%s started', __name__)
+    logger.info('Generator started')
     try:
-        generator.set_random_seed()
         generator.generate_order_history()
         generator.write_sql_dump()
     except Exception as e:

@@ -19,7 +19,7 @@ config_logger.addHandler(config_logger_handler)
 config_parser = confuse.Configuration(APP_NAME, __name__)
 
 if Path(config_parser.config_dir(), confuse.CONFIG_FILENAME).is_file():
-    config_logger.info('Config at %s/%s' % (config_parser.config_dir(), confuse.CONFIG_FILENAME))
+    config_logger.info('Reading config at %s/%s' % (config_parser.config_dir(), confuse.CONFIG_FILENAME))
 
     # TODO Create default config in config_dir() path
 
