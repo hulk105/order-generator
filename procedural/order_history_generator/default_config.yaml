@@ -1,8 +1,8 @@
 # Possible values: debug, info, warning, error, critical
-LOG_LEVEL: info4
+LOG_LEVEL: info
 
-# Seed must be integer only, or empty
-SEED: 256071
+# Seed must be integer or empty
+SEED: 254781069873
 
 # Integer only
 INITIAL_ORDER_ID: 254781069873
@@ -41,11 +41,10 @@ CURRENCY_PAIR:
     - "NZD/CHF": 0.631029
     - "NZD/JPY": 71.310905
 
-# ZONES date format - 'YYYY-mm-dd HH:MM:SS.f'
-
 ZONES:
   RED:
     initial_date: '2020-06-05 15:27:45.354354'
+    end_date: '2020-06-05 23:00:45.354354'
     orders_count: 300
     statuses:
       - - To Provider
@@ -62,6 +61,7 @@ ZONES:
 
   GREEN:
     initial_date: '2020-06-06 07:00:45.465874'
+    end_date: '2020-06-05 23:00:45.354354'
     orders_count: 1100
     statuses:
       - - New
@@ -80,6 +80,7 @@ ZONES:
 
   BLUE:
     initial_date: '2020-06-07 07:00:05.154784'
+    end_date: '2020-06-05 14:00:45.354354'
     orders_count: 600
     statuses:
       - - New

@@ -71,7 +71,3 @@ def randint(min: int, max: int):
 def choice(list: list):
     result = round(next(itertools.islice(sequence, sequence_offset, None))) % len(list)
     return list[result]
-
-
-for _ in range(100):
-    print(randint(5, 10), choice([0, 2]))

@@ -6,6 +6,7 @@ import gc
 from pypika import Table, Query
 
 import properties
+import lcg_generator.generator as lcg
 from logger import logger
 
 orders_history = []
@@ -90,7 +91,7 @@ def generate_orders_for_zone(zone):
         px_delta = round(random_delta(0.000001, 0.00001, px_init), 6)
 
         # Random Vol
-        vol = random.randint(1, 1000) + random.random()
+        vol = lcg.randint(1, 1000) + random.random()
 
         # Random statuses from possible status list
         statuses = random.choice(properties.ZONES[zone][properties.statuses])
@@ -99,11 +100,11 @@ def generate_orders_for_zone(zone):
         change_date = creation_date
 
         # Generate random tags sample from tags list
-        tags = random.sample(properties.TAGS, random.randint(1, 4))
+        tags = random.sample(properties.TAGS, lcg.randint(1, 4))
 
         description = None
 
-        extra_data = generate_extra_data(random.randint(1, 2000))
+        extra_data = generate_extra_data(lcg.randint(1, 2000))
 
         # Changing status dependent fields
         for status in statuses:
@@ -113,7 +114,7 @@ def generate_orders_for_zone(zone):
                 # Add random time delta (30s - 5m) for every new status if it is not New
                 # TODO !!! This has to consider orders time dispersion for 50k+ iterations,
                 #  otherwise the date sequence in a single order will be invalid
-                change_date += datetime.timedelta(microseconds=random.randint(30000000, 300000000))
+                change_date += datetime.timedelta(microseconds=lcg.randint(30000000, 300000000))
 
             # Partially filled Price +- delta
             if status == 'Partially Filled':
@@ -147,10 +148,10 @@ def generate_orders_for_zone(zone):
             orders_in_zone_count += 1
 
         # Add random to these values up to next iteration
-        order_id += random.randint(100, 600)
+        order_id += lcg.randint(100, 600)
         # creation_date += datetime.timedelta(
         #     # 3,600 s * 1,000,000 μs * hours range in zone / orders count in zone + random (1 - 1,000,000 μs)
-        #     microseconds=3600 * hour_range * 1000000 / properties.ORDERS_COUNT[zone] + random.randint(1, 100000)
+        #     microseconds=3600 * hour_range * 1000000 / properties.ORDERS_COUNT[zone] + lcg.randint(1, 100000)
         # )
         creation_date += time_range
     logger.info('DONE - Generated %s orders for %s zone' % (orders_in_zone_count, zone))
@@ -158,7 +159,7 @@ def generate_orders_for_zone(zone):
 
 def random_delta(range_min, range_max, value):
     delta = random.triangular(range_min, range_max)
-    if random.randint(0, 1) == 0:
+    if lcg.randint(0, 1) == 0:
         return value + delta
     else:
         return value - delta
