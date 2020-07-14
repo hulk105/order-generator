@@ -1,7 +1,7 @@
 import logging
 
 from logger import logger
-from mersenne_twister_based import generator
+from order_history_generator import generator
 
 
 def init():
