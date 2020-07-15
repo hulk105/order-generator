@@ -24,6 +24,7 @@ def workflow():
 
 def result():
     generator.show_total()
+    logger.info('Done')
 
 
 if __name__ == '__main__':

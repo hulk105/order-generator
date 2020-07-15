@@ -20,12 +20,15 @@ def get_digits_count(number):
         return int(math.log10(-number)) + 2
 
 
+def get_hash(value, length):
+    return int(hashlib.sha1(str(value).encode('utf-8')).hexdigest(), 16) % (10 ** length)
+
+
 if properties.SEED is not None:
-    seed = int(hashlib.sha1(str(properties.SEED).encode('utf-8')).hexdigest(), 16) % (10 ** 8)
+    seed = get_hash(properties.SEED, 8)
     logger.debug('seed: %s' % properties.SEED)
 else:
-    seed = datetime.datetime.now().microsecond
-    logger.debug('seed: %s' % seed)
+    seed = get_hash(datetime.datetime.now().microsecond, 8)
 
 logger.debug('seed hash: %s' % seed)
 

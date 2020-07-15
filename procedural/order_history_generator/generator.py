@@ -1,6 +1,5 @@
 import datetime
 import hashlib
-import gc
 
 from pypika import Table, Query
 
@@ -20,20 +19,28 @@ def benchmark_function(func):
         start = time.time()
         return_value = func(*args, **kwargs)
         end = time.time()
-        logger.info('Finished in %s ms.' % str(end - start))
+        logger.info('Finished in %s seconds' % str(end - start))
         return return_value
 
     return wrapper
+
+
+def add_up_random_delta(range_min, range_max, value):
+    delta = lcg.randfloat(range_min, range_max)
+    if lcg.randint(0, 1) == 0:
+        return value + delta
+    else:
+        return value - delta
+
+
+def generate_sha1_extra_data(*args):
+    return hashlib.sha1(bytes(*args)).hexdigest()
 
 
 @benchmark_function
 def generate_order_history() -> None:
     for zone in properties.ZONES:
         generate_orders_for_zone(zone)
-
-
-def show_total():
-    logger.info('Total orders generated: %s' % str(len(orders_history)))
 
 
 def generate_orders_for_zone(zone):
@@ -44,23 +51,26 @@ def generate_orders_for_zone(zone):
     for statuses in properties.ZONES[zone][properties.statuses]:
         logger.debug(str(statuses))
 
+    zone_orders_count = round(properties.TOTAL_ORDERS * properties.ZONES[zone][properties.orders_count])
+    logger.debug('Single orders to generate: %s' % zone_orders_count)
+
     # Initial order_id
     order_id = properties.INITIAL_ORDER_ID
 
     # Parse Initial date
-    creation_date = datetime.datetime.strptime(properties.ZONES[zone][properties.initial_date],
-                                               properties.DATE_FORMAT)
+    creation_date = datetime.datetime.strptime(
+        properties.ZONES[zone][properties.initial_date], properties.DATE_FORMAT)
 
-    end_date = datetime.datetime.strptime(properties.ZONES[zone][properties.end_date],
-                                          properties.DATE_FORMAT)
+    end_date = datetime.datetime.strptime(
+        properties.ZONES[zone][properties.end_date], properties.DATE_FORMAT)
 
     # Time step for timedelta
-    time_step = (end_date - creation_date) / properties.ZONES[zone][properties.orders_count]
+    time_step = (end_date - creation_date) / zone_orders_count
 
-    orders_in_zone_count = 0
+    zone_statuses_count = 0
 
     # Begin iterating
-    for i in range(properties.ZONES[zone][properties.orders_count]):
+    for i in range(zone_orders_count):
 
         # Random Provider ID
         provider_id = lcg.choice(properties.PROVIDER_ID)
@@ -75,7 +85,7 @@ def generate_orders_for_zone(zone):
         px_init = currency_pair[1]
 
         # Random Price delta for each iteration
-        px_delta = round(random_delta(0.000001, 0.00001, px_init), 6)
+        px_delta = round(add_up_random_delta(0.000001, 0.00001, px_init), 6)
 
         # Random Vol
         vol = lcg.randfloat(1, 1000)
@@ -91,7 +101,7 @@ def generate_orders_for_zone(zone):
 
         description = None
 
-        extra_data = generate_extra_data(lcg.randint(1, 2000))
+        extra_data = generate_sha1_extra_data(lcg.randint(1, 2000))
 
         # Changing status dependent fields
         for status in statuses:
@@ -105,14 +115,14 @@ def generate_orders_for_zone(zone):
 
             # Partially filled Price +- delta
             if status == 'Partially Filled':
-                px_delta = round(random_delta(0.000001, 0.00001, px_init), 6)
+                px_delta = round(add_up_random_delta(0.000001, 0.00001, px_init), 6)
 
             # Vol = 0 if status is Rejected
             if status == 'Rejected':
                 vol = 0
 
             # Result Order
-            order = [
+            order = (
                 hex(order_id),
                 provider_id,
                 direction,
@@ -125,33 +135,18 @@ def generate_orders_for_zone(zone):
                 tags,
                 description,
                 extra_data
-            ]
+            )
             # Append to result List of orders
             orders_history.append(order)
 
             # Count order
-            orders_in_zone_count += 1
+            zone_statuses_count += 1
 
         # Add random to these values up to next iteration
         order_id += lcg.randint(100, 600)
-        # creation_date += datetime.timedelta(
-        #     # 3,600 s * 1,000,000 μs * hours range in zone / orders count in zone + random (1 - 1,000,000 μs)
-        #     microseconds=3600 * hour_range * 1000000 / properties.ORDERS_COUNT[zone] + lcg.randint(1, 100000)
-        # )
         creation_date += time_step
-    logger.info('DONE - Generated %s orders for %s zone' % (orders_in_zone_count, zone))
-
-
-def random_delta(range_min, range_max, value):
-    delta = lcg.randfloat(range_min, range_max)
-    if lcg.randint(0, 1) == 0:
-        return value + delta
-    else:
-        return value - delta
-
-
-def generate_extra_data(*args):
-    return hashlib.sha1(bytes(*args)).hexdigest()
+    logger.info('DONE - Generated %s total orders with %s statuses for %s zone' % (
+        zone_orders_count, zone_statuses_count, zone))
 
 
 @benchmark_function
@@ -161,3 +156,7 @@ def write_sql_dump():
         # Generate DB query
         query = Query.into(orders_table).insert(*order)
         sql_dump_file.write(str(query) + '\n')
+
+
+def show_total():
+    logger.info('Total orders with statuses generated: %s' % str(len(orders_history)))

@@ -28,4 +28,3 @@ logger.addHandler(file_handler)
 logger.addHandler(console_handler)
 
 logger.info('Log level set up to %s' % logging.getLevelName(logger.level))
-
