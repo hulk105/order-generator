@@ -27,5 +27,5 @@ if Path(config_parser.config_dir(), confuse.CONFIG_FILENAME).is_file():
     config_logger.info('Reading config at %s/%s' % (config_parser.config_dir(), confuse.CONFIG_FILENAME))
 else:
     config_logger.fatal('Config not found at %s' % (config_parser.config_dir()))
-    # TODO Create default config in config_dir() path if it does't exist
+    # TODO Create default config in config_dir() path if it does not exist
     sys.exit(1)
