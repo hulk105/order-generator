@@ -6,8 +6,8 @@ SEED: 23
 
 TOTAL_ORDERS: 2000
 
-# Integer only
-INITIAL_ORDER_ID: 254781069873
+# Hex integer only
+INITIAL_ORDER_ID: 3b52229a31
 
 PROVIDER_ID:
   values:
