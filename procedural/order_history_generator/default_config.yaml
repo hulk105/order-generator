@@ -7,7 +7,7 @@ SEED: 23
 TOTAL_ORDERS: 2000
 
 # Hex integer only
-INITIAL_ORDER_ID: 3b52229a31
+INITIAL_ORDER_ID: deadbeef00
 
 PROVIDER_ID:
   values:
