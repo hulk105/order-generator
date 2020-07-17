@@ -1,0 +1,110 @@
+# Possible values: debug, info, warning, error, critical
+LOG_LEVEL: debug
+
+# Seed can be int, float, string type or empty
+SEED: 23
+
+TOTAL_ORDERS: 2000
+
+# Hex integer only
+INITIAL_ORDER_ID: deadbeef00
+
+PROVIDER_ID:
+  - SQM
+  - FXCM
+
+DIRECTION:
+  - Buy
+  - Sell
+
+CURRENCY_PAIR:
+  EUR/USD: 1.120199
+  GBP/USD: 1.304649
+  USD/CHF: 0.984286
+  USD/JPY: 112.175823
+  AUD/USD: 0.677025
+  NZD/USD: 0.648999
+  CAD/CHF: 0.744244
+  CAD/JPY: 84.706831
+  CHF/JPY: 114.252908
+  EUR/AUD: 1.712235
+  EUR/CAD: 1.502292
+  EUR/CHF: 1.072143
+  EUR/GBP: 0.874086
+  EUR/JPY: 121.346875
+  EUR/NZD: 1.787336
+  GBP/AUD: 1.981400
+  GBP/CAD: 1.732194
+  NZD/CAD: 0.861681
+  NZD/CHF: 0.631029
+  NZD/JPY: 71.310905
+
+# ZONES date format - 'YYYY-mm-dd HH:MM:SS.f'
+ZONES:
+  RED:
+    initial_date: '2020-06-05 15:27:45.354354'
+    end_date: '2020-06-05 23:27:00.000000'
+    percent_of_total_orders: 0.15
+    possible_statuses:
+      - - To Provider
+        - Rejected
+      - - To Provider
+        - Filled
+      - - Rejected
+      - - Partially Filled
+      - - Filled
+      - - Partially Filled
+        - Filled
+      - - To Provider
+        - Partially Filled
+  GREEN:
+    initial_date: '2020-06-06 07:00:45.465874'
+    end_date: '2020-06-06 23:00:45.465874'
+    percent_of_total_orders: 0.55
+    possible_statuses:
+      - - New
+        - To Provider
+        - Partially Filled
+        - Filled
+      - - New
+        - To Provider
+        - Filled
+      - - New
+        - To Provider
+        - Partially Filled
+      - - New
+        - To Provider
+        - Rejected
+  BLUE:
+    initial_date: '2020-06-07 07:00:05.154784'
+    end_date: '2020-06-07 13:00:05.154784'
+    percent_of_total_orders: 0.30
+    possible_statuses:
+      - - New
+      - - New
+        - To Provider
+      - - New
+        - To Provider
+        - Partially Filled
+TAGS:
+  - COMP
+  - DJIA
+  - DJT
+  - DJU
+  - GDOW
+  - IXCO
+  - MID
+  - NDX
+  - NYA
+  - OEX
+  - PSE
+  - RUI
+  - RUT
+  - SOX
+  - SPX
+  - XX:TNX
+  - XX:TYX
+  - XAU
+  - XAX
+  - XMI
+  - XX:XOI

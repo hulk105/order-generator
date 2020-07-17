@@ -1,9 +1,21 @@
 import datetime
 import hashlib
+import logging
 import math
-import properties
 
-from logger import logger
+import yaml
+
+import constants as const
+
+
+def get_config(path):
+    config_file = open(path)
+    return yaml.load(config_file, Loader=yaml.FullLoader)
+
+
+config = get_config(const.CONFIG_PATH)
+
+SEED = config['SEED']
 
 
 def get_digit(number, n):
@@ -24,40 +36,39 @@ def get_hash(value, length):
     return int(hashlib.sha1(str(value).encode('utf-8')).hexdigest(), 16) % (10 ** length)
 
 
-if properties.SEED is not None:
-    seed = get_hash(properties.SEED, 8)
-    logger.debug('seed: %s' % properties.SEED)
+if SEED is not None:
+    seed = get_hash(SEED, 8)
+    logging.debug('seed: %s' % SEED)
 else:
     seed = get_hash(datetime.datetime.now().microsecond, 8)
 
-logger.debug('seed hash: %s' % seed)
+logging.debug('seed hash: %s' % seed)
 
 random_step = get_digit(seed, 2)
 if random_step == 0 or random_step == 1:
     random_step = 3
-logger.debug('random_step: %s' % random_step)
+logging.debug('random_step: %s' % random_step)
 
 sequence_offset = get_digit(seed, 1)
-logger.debug('sequence offset: %s' % sequence_offset)
+logging.debug('sequence offset: %s' % sequence_offset)
 
 seed_as_float = seed
 seed_size = get_digits_count(seed)
 while seed_size > 1:
     seed_as_float /= 10
     seed_size -= 1
-logger.debug('seed float %s' % seed_as_float)
+logging.debug('seed float %s' % seed_as_float)
 
 multiplier = seed_as_float - int(seed_as_float) + 1
-logger.debug('multiplier: %s' % multiplier)
+logging.debug('multiplier: %s' % multiplier)
 
 
 def lcg(max):
     current = seed
     step = max // random_step
-    logger.debug('Step: %s' % step)
+    logging.debug('Step: %s' % step)
     while True:
         next = (current * multiplier + step) % max
-        # print('next', next)
         yield next
         current = next
 
@@ -66,7 +77,6 @@ sequence = iter(lcg(seed))
 
 
 def randint(min: int, max: int):
-    # result = round(next(itertools.islice(sequence, sequence_offset, None))) % (max + 1)
     result = round(next(sequence)) % (max + 1)
     if result < min:
         return result + min
@@ -75,7 +85,6 @@ def randint(min: int, max: int):
 
 
 def randfloat(min: float, max: float):
-    # result = next(itertools.islice(sequence, sequence_offset, None)) % (max + 1)
     result = next(sequence) % max
     if result < min:
         return result + min
@@ -84,7 +93,6 @@ def randfloat(min: float, max: float):
 
 
 def choice(population: list):
-    # result = round(next(itertools.islice(sequence, sequence_offset, None))) % len(list)
     result = round(next(sequence)) % len(population)
     return population[result]
 

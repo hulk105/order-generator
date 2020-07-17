@@ -1,6 +1,8 @@
 import logging
 
-from logger import logger
+import yaml
+
+import constants as const
 from order_history_generator import generator
 
 
@@ -9,26 +11,25 @@ def init():
 
 
 def setup():
-    # TODO Setup logger and config here
     pass
 
 
+def setup_logger():
+    logging.basicConfig(level=logging.DEBUG, filename=const.LOG_FILENAME, format=const.LOG_DEFAULT_FORMAT)
+
+
 def workflow():
-    logger.info('Generator started')
-    try:
-        generator.generate_order_history()
-        generator.write_sql_dump()
-    except Exception as e:
-        logger.error(e)
+    logging.info(const.APP_NAME + 'started')
+    generator.generate_order_history()
 
 
-def result():
+def output():
     generator.show_total()
-    logger.info('Done')
+    logging.info('Done')
 
 
 if __name__ == '__main__':
     init()
-    setup()
+    setup_logger()
     workflow()
-    result()
+    output()
