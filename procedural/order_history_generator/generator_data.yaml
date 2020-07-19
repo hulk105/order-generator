@@ -1,9 +1,3 @@
-# Possible values: debug, info, warning, error, critical
-LOG_LEVEL: debug
-
-# Seed can be int, float, string type or empty
-SEED: 23
-
 TOTAL_ORDERS: 2000
 
 # Hex integer only

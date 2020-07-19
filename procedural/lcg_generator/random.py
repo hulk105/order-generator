@@ -8,14 +8,10 @@ import yaml
 import constants as const
 
 
-def get_config(path):
-    config_file = open(path)
-    return yaml.load(config_file, Loader=yaml.FullLoader)
+file = open(const.CONFIG_ABS_PATH)
+config = yaml.load(file, Loader=yaml.FullLoader)
 
-
-config = get_config(const.CONFIG_PATH)
-
-SEED = config['SEED']
+SEED = config['RANDOM_SEED']
 
 
 def get_digit(number, n):
@@ -105,3 +101,11 @@ def sample(population: list, k: int):
         list_item = population[round(next(sequence)) % len(population)]
         result_list.append(list_item)
     return list(dict.fromkeys(result_list))
+
+
+def randomly_modify_value(range_min, range_max, value):
+    delta = randfloat(range_min, range_max)
+    if randint(0, 1) == 0:
+        return value + delta
+    else:
+        return value - delta

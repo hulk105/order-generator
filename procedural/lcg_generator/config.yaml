@@ -1,0 +1,2 @@
+# Seed can be int, float, string type or empty
+RANDOM_SEED: 23
