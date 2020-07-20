@@ -1,9 +1,12 @@
+import math
+
 from utils.utils import get_digits_count, get_decimal_hash
 
 SEED_LENGTH = 8
 DEFAULT_STEP_DIVIDER = 3
 STEP_DIVIDER_LENGTH = 1
 MULTIPLIER_INTEGER = 1
+DEFAULT_MULTIPLIER = math.pi
 
 
 class Singleton(type):
@@ -17,17 +20,20 @@ class Singleton(type):
 
 
 class LinearCongruentGenerator:
-    def __init__(self, value=None, seed_length=SEED_LENGTH):
+    def __init__(self, seed_value=None, seed_length: int = SEED_LENGTH,
+                 step_divider: int = DEFAULT_STEP_DIVIDER, multiplier: float = None):
         self._seed = get_decimal_hash(id(self), seed_length) \
-            if value is None \
-            else get_decimal_hash(value, seed_length)
+            if seed_value is None else get_decimal_hash(seed_value, seed_length)
 
         _seed_hash = get_decimal_hash(self._seed, seed_length)
 
-        self._step_divider = DEFAULT_STEP_DIVIDER \
+        self._step_divider = step_divider \
             if get_decimal_hash(self._seed, STEP_DIVIDER_LENGTH) == 0 \
             else get_decimal_hash(self._seed, STEP_DIVIDER_LENGTH)
-        self._multiplier = MULTIPLIER_INTEGER + (_seed_hash / (10 ** get_digits_count(_seed_hash)))
+
+        self._multiplier = MULTIPLIER_INTEGER + (_seed_hash / (10 ** get_digits_count(_seed_hash))) \
+            if multiplier is None else multiplier
+
         self._sequence = iter(self._lcg(self._seed))
 
     def seed(self, value, seed_length=SEED_LENGTH):
@@ -80,7 +86,7 @@ class LinearCongruentGenerator:
             return value - delta
 
 
-s1 = LinearCongruentGenerator(23)
+s1 = LinearCongruentGenerator(seed_value=23, step_divider=0, multiplier=1.7844454)
 s1.get_current_status()
 s2 = LinearCongruentGenerator()
 s2.get_current_status()
