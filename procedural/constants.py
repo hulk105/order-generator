@@ -1,5 +1,4 @@
 import os
-import logging
 from pathlib import Path
 
 
@@ -10,7 +9,7 @@ PROJECT_ABS_PATH = os.path.dirname(os.path.abspath(__file__))
 # Log
 LOG_FILENAME = str(APP_NAME + '.log')
 LOG_DEFAULT_FORMAT = '%(asctime)s %(levelname)s %(message)s'
-LOG_DEFAULT_LOGGING_LEVEL = logging.DEBUG
+LOG_DEFAULT_LOGGING_LEVEL = 20
 
 
 # CONFIG

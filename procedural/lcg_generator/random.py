@@ -1,68 +1,36 @@
-import datetime
-import hashlib
-import logging
-import math
+from datetime import datetime
 
 import yaml
 
+from utils.utils import get_decimal_hash, get_digits_count
 import constants as const
-
 
 file = open(const.CONFIG_ABS_PATH)
 config = yaml.load(file, Loader=yaml.FullLoader)
 
-SEED = config['RANDOM_SEED']
+RANDOM_SEED = 'RANDOM_SEED'
+SEED = config[RANDOM_SEED]
+DEFAULT_SEED_LENGTH = 8
+DEFAULT_STEP_DIVIDER = 3
+STEP_DIVIDER_LENGTH = 1
+MULTIPLIER_INTEGER = 1
 
+seed = get_decimal_hash(SEED, DEFAULT_SEED_LENGTH) \
+    if SEED is not None \
+    else get_decimal_hash(datetime.now().microsecond, 8)
 
-def get_digit(number, n):
-    return number // 10 ** n % 10
+seed_hash = get_decimal_hash(seed, DEFAULT_SEED_LENGTH)
 
+step_divider = DEFAULT_STEP_DIVIDER \
+    if get_decimal_hash(seed, STEP_DIVIDER_LENGTH) == 0 \
+    else get_decimal_hash(seed, STEP_DIVIDER_LENGTH)
 
-def get_digits_count(number):
-    if number > 0:
-        return int(math.log10(number)) + 1
-    elif number == 0:
-        return 1
-    else:
-        # +1 if you don't count the '-'
-        return int(math.log10(-number)) + 2
-
-
-def get_hash(value, length):
-    return int(hashlib.sha1(str(value).encode('utf-8')).hexdigest(), 16) % (10 ** length)
-
-
-if SEED is not None:
-    seed = get_hash(SEED, 8)
-    logging.debug('seed: %s' % SEED)
-else:
-    seed = get_hash(datetime.datetime.now().microsecond, 8)
-
-logging.debug('seed hash: %s' % seed)
-
-random_step = get_digit(seed, 2)
-if random_step == 0 or random_step == 1:
-    random_step = 3
-logging.debug('random_step: %s' % random_step)
-
-sequence_offset = get_digit(seed, 1)
-logging.debug('sequence offset: %s' % sequence_offset)
-
-seed_as_float = seed
-seed_size = get_digits_count(seed)
-while seed_size > 1:
-    seed_as_float /= 10
-    seed_size -= 1
-logging.debug('seed float %s' % seed_as_float)
-
-multiplier = seed_as_float - int(seed_as_float) + 1
-logging.debug('multiplier: %s' % multiplier)
+multiplier = MULTIPLIER_INTEGER + seed_hash / (10 ** get_digits_count(seed_hash))
 
 
 def lcg(max):
     current = seed
-    step = max // random_step
-    logging.debug('Step: %s' % step)
+    step = max // step_divider
     while True:
         next = (current * multiplier + step) % max
         yield next

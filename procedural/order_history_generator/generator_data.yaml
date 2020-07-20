@@ -36,8 +36,8 @@ CURRENCY_PAIR:
 # ZONES date format - 'YYYY-mm-dd HH:MM:SS.f'
 ZONES:
   RED:
-    initial_date: '2020-06-05 15:27:45.354354'
-    end_date: '2020-06-05 23:27:00.000000'
+    initial_date: '2020-06-05 16:20:00.123456'
+    end_date: '2020-06-05 23:30:00.123456'
     percent_of_total_orders: 0.15
     possible_statuses:
       - - To Provider
@@ -52,8 +52,8 @@ ZONES:
       - - To Provider
         - Partially Filled
   GREEN:
-    initial_date: '2020-06-06 07:00:45.465874'
-    end_date: '2020-06-06 23:00:45.465874'
+    initial_date: '2020-06-06 04:20:00.123456'
+    end_date: '2020-06-06 23:30:00.123456'
     percent_of_total_orders: 0.55
     possible_statuses:
       - - New
@@ -70,8 +70,8 @@ ZONES:
         - To Provider
         - Rejected
   BLUE:
-    initial_date: '2020-06-07 07:00:05.154784'
-    end_date: '2020-06-07 13:00:05.154784'
+    initial_date: '2020-06-07 04:20:00.123456'
+    end_date: '2020-06-07 13:00:00.123456'
     percent_of_total_orders: 0.30
     possible_statuses:
       - - New
