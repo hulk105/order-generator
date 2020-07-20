@@ -36,13 +36,6 @@ class LinearCongruentGenerator:
 
         self._sequence = iter(self._lcg(self._seed))
 
-    def seed(self, value, seed_length=SEED_LENGTH):
-        """Change object instance seed parameters"""
-        pass
-
-    def get_current_status(self):
-        print(self._seed, self._step_divider, self._multiplier)
-
     def _lcg(self, max):
         current = self._seed
         step = max // self._step_divider
@@ -50,6 +43,13 @@ class LinearCongruentGenerator:
             next = (current * self._multiplier + step) % max
             yield next
             current = next
+
+    def seed(self, value, seed_length=SEED_LENGTH):
+        """Change object instance seed parameters"""
+        pass
+
+    def get_current_status(self):
+        print(self._seed, self._step_divider, self._multiplier)
 
     def randint(self, min: int, max: int):
         result = round(next(self._sequence)) % (max + 1)
@@ -84,9 +84,3 @@ class LinearCongruentGenerator:
             return value + delta
         else:
             return value - delta
-
-
-s1 = LinearCongruentGenerator(seed_value=23, step_divider=0, multiplier=1.7844454)
-s1.get_current_status()
-s2 = LinearCongruentGenerator()
-s2.get_current_status()

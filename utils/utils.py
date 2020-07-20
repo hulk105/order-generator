@@ -10,11 +10,11 @@ def benchmark_function(func):
     return wrapper()
 
 
-def get_digit(number, n):
+def get_digit(number, n) -> int:
     return number // 10 ** n % 10
 
 
-def get_digits_count(number):
+def get_digits_count(number) -> int:
     from math import log10
 
     if number > 0:
@@ -26,6 +26,6 @@ def get_digits_count(number):
         return int(log10(-number)) + 2
 
 
-def get_decimal_hash(value, length):
+def get_decimal_hash(value, length: int) -> int:
     from hashlib import sha1
     return int(sha1(str(value).encode('utf-8')).hexdigest(), 16) % (10 ** length)
