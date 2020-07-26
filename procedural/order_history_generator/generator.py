@@ -17,9 +17,9 @@ PROVIDER_ID = 'PROVIDER_ID'
 DIRECTION = 'DIRECTION'
 CURRENCY_PAIR = 'CURRENCY_PAIR'
 TAGS = 'TAGS'
-ORDER_ID_INCREMENT = 3, 10
+ORDER_ID_INCREMENT_RANGE = 3, 10
 PX_DEFAULT_ROUND = 6
-PX_DELTA = 0.000001, 0.00001
+PX_DELTA_RANGE = 0.000001, 0.00001
 VOL_DEFAULT_ROUND = 4
 NUMBER_OF_TAGS_PER_ORDER = 1, 2
 
@@ -36,7 +36,7 @@ def generate_orders_history(data: dict, result_list: list):
     def increment_order_id():
         order_id = get_initial_order_id()
         while True:
-            order_id += lcg.randint(*ORDER_ID_INCREMENT)
+            order_id += lcg.randint(*ORDER_ID_INCREMENT_RANGE)
             yield order_id
 
     def random_provider_id():
@@ -51,7 +51,7 @@ def generate_orders_history(data: dict, result_list: list):
         currency_pair = lcg.choice(list(data[CURRENCY_PAIR].items()))
         currency_pair_string = currency_pair[0]
         px_init = currency_pair[1]
-        px = round(lcg.randomly_modify_value(*PX_DELTA, px_init), PX_DEFAULT_ROUND)
+        px = round(lcg.randomly_modify_value(*PX_DELTA_RANGE, px_init), PX_DEFAULT_ROUND)
         return [currency_pair_string, px]
 
     def random_vol():
@@ -122,7 +122,7 @@ def generate_orders_history(data: dict, result_list: list):
             if status != 'New':
                 change_date += timedelta(microseconds=lcg.randint(*TIME_DELTA))
             if status == 'Partially Filled':
-                px = round(lcg.randomly_modify_value(*PX_DELTA, px), PX_DEFAULT_ROUND)
+                px = round(lcg.randomly_modify_value(*PX_DELTA_RANGE, px), PX_DEFAULT_ROUND)
             if status == 'Rejected':
                 px = 0
                 vol = 0
