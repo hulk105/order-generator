@@ -1,4 +1,5 @@
 import logging
+import sys
 
 import yaml
 
@@ -15,7 +16,7 @@ logging.basicConfig(level=const.LOG_DEFAULT_LOGGING_LEVEL,
 logger = logging.getLogger(const.APP_NAME)
 logger.info('logger set up at %s, writing %s' % (logger.name, const.LOG_FILENAME))
 
-data_file = open(const.GENERATOR_DATA_ABS_PATH)
+data_file = open(const.ORDER_GENERATOR_DATA_ABS_PATH)
 data = yaml.load(data_file, Loader=yaml.FullLoader)
 sql_dump = open(const.SQL_DUMP_FILENAME, 'w')
 
@@ -25,16 +26,20 @@ if __name__ == '__main__':
     try:
         generate_orders_history(data, result_list)
     except Exception as e:
-        logger.error(e)
+        logger.error(e, exc_info=const.EXCEPTION_INFO)
     else:
         logger.info('succsessfully generated %s zones' % len(result_list))
+
+    if len(result_list) == 0:
+        sys.exit(1)
+
     logger.info('writing sql dump to %s' % sql_dump.name)
     try:
         for i in result_list:
             for j in i:
                 write_sql_query(sql_dump, const.TABLE_NAME, j)
     except Exception as e:
-        logger.error(e)
+        logger.exception(e, exc_info=const.EXCEPTION_INFO)
     else:
         logger.info('succsessfully wrote to %s' % sql_dump.name)
 logger.info('Done')

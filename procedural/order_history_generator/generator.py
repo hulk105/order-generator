@@ -16,12 +16,16 @@ INITIAL_ORDER_ID = 'INITIAL_ORDER_ID'
 PROVIDER_ID = 'PROVIDER_ID'
 DIRECTION = 'DIRECTION'
 CURRENCY_PAIR = 'CURRENCY_PAIR'
+CURRENCY_PAIR_NAME = 0
+CURRENCY_PAIR_VALUE = 1
 TAGS = 'TAGS'
 ORDER_ID_INCREMENT_RANGE = 3, 10
 PX_DEFAULT_ROUND = 6
 PX_DELTA_RANGE = 0.000001, 0.00001
 VOL_DEFAULT_ROUND = 4
 NUMBER_OF_TAGS_PER_ORDER = 1, 2
+RANDOM_VOL_RANGE = 1, 1000
+RANDOM_EXTRA_DATA_HASH_RANGE = 1, 2000
 
 # 30-60 seconds as microseconds
 TIME_DELTA = 30000000, 60000000
@@ -49,13 +53,13 @@ def generate_orders_history(data: dict, result_list: list):
 
     def random_currency_pair():
         currency_pair = lcg.choice(list(data[CURRENCY_PAIR].items()))
-        currency_pair_string = currency_pair[0]
-        px_init = currency_pair[1]
+        currency = currency_pair[CURRENCY_PAIR_NAME]
+        px_init = currency_pair[CURRENCY_PAIR_VALUE]
         px = round(lcg.randomly_modify_value(*PX_DELTA_RANGE, px_init), PX_DEFAULT_ROUND)
-        return [currency_pair_string, px]
+        return [currency, px]
 
     def random_vol():
-        vol = lcg.randint(1, 1000)
+        vol = lcg.randint(*RANDOM_VOL_RANGE)
         return vol
 
     def random_tags():
@@ -67,7 +71,7 @@ def generate_orders_history(data: dict, result_list: list):
         return None
 
     def random_extra_data():
-        extra_data = lcg.randint(1, 2000)
+        extra_data = lcg.randint(*RANDOM_EXTRA_DATA_HASH_RANGE)
         return sha1(bytes(extra_data)).hexdigest()
 
     # Dynamic (zone specific) fields
@@ -114,8 +118,8 @@ def generate_orders_history(data: dict, result_list: list):
         possible_statuses = random_possible_statuses(zone)
         change_date = initial_date
         currency_pair = random_currency_pair()
-        currency = currency_pair[0]
-        px = currency_pair[1]
+        currency_name = currency_pair[CURRENCY_PAIR_NAME]
+        px = currency_pair[CURRENCY_PAIR_VALUE]
         vol = random_vol()
         dynamic_fields = []
         for status in possible_statuses:
@@ -127,7 +131,7 @@ def generate_orders_history(data: dict, result_list: list):
                 px = 0
                 vol = 0
             dynamic_fields.append(
-                [str(change_date), status, currency, px, round(vol * px, VOL_DEFAULT_ROUND)]
+                [str(change_date), status, currency_name, px, round(vol * px, VOL_DEFAULT_ROUND)]
             )
         return dynamic_fields
 

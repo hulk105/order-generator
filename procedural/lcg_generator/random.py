@@ -1,15 +1,9 @@
 from datetime import datetime
-
-import yaml
-
 from utils.utils import get_decimal_hash, get_digits_count
 import constants as const
 
-file = open(const.CONFIG_ABS_PATH)
-config = yaml.load(file, Loader=yaml.FullLoader)
-
 RANDOM_SEED = 'RANDOM_SEED'
-SEED = config[RANDOM_SEED]
+SEED = const.RANDOM_SEED
 DEFAULT_SEED_LENGTH = 8
 DEFAULT_STEP_DIVIDER = 3
 STEP_DIVIDER_LENGTH = 1
