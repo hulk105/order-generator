@@ -11,6 +11,9 @@ INITIAL_DATE = 'initial_date'
 END_DATE = 'end_date'
 DELTA = 'delta'
 ZONES = 'ZONES'
+NEW = 'New'
+PARTIALLY_FILLED = 'Partially Filled'
+REJECTED = 'Rejected'
 TOTAL_ORDERS = 'TOTAL_ORDERS'
 INITIAL_ORDER_ID = 'INITIAL_ORDER_ID'
 PROVIDER_ID = 'PROVIDER_ID'
@@ -29,16 +32,18 @@ RANDOM_EXTRA_DATA_HASH_RANGE = 1, 2000
 
 # 30-60 seconds as microseconds
 TIME_DELTA = 30000000, 60000000
+STATUS_TIME_DELTA = 100, 999999
 
 
 def generate_orders_history(data: dict, result_list: list):
     # Incremental fields
-    def get_initial_order_id():
+    def get_decimal_initial_order_id():
         initial_order_id = int(data[INITIAL_ORDER_ID], 16)
         return initial_order_id
 
-    def increment_order_id():
-        order_id = get_initial_order_id()
+    def increment_order_id(order_id: int):
+        order_id = order_id
+        yield order_id
         while True:
             order_id += lcg.randint(*ORDER_ID_INCREMENT_RANGE)
             yield order_id
@@ -93,11 +98,9 @@ def generate_orders_history(data: dict, result_list: list):
         time_step = (get_zone_end_date(zone) - get_zone_initial_date(zone)) / get_zone_orders_count(zone)
         return time_step
 
-    def increment_date(zone):
-        date = get_zone_initial_date(zone)
-        time_step = get_zone_time_step(zone)
+    def increment_date(date: datetime, time_step: timedelta):
         while True:
-            date += time_step + timedelta(microseconds=lcg.randint(100, 999999))
+            date += time_step + timedelta(microseconds=lcg.randint(*STATUS_TIME_DELTA))
             yield date
 
     def random_possible_statuses(zone):
@@ -106,50 +109,45 @@ def generate_orders_history(data: dict, result_list: list):
 
     # Combined fields
     def generate_order_static_section() -> list:
-        return [
-            random_provider_id(),
-            random_direction(),
-            random_tags(),
-            random_description(),
-            random_extra_data(),
-        ]
+        return [random_provider_id(), random_direction(), random_tags(), random_description(), random_extra_data()]
 
     def generate_order_dynamic_section(zone, initial_date: datetime) -> list:
+        dynamic_fields = []
         possible_statuses = random_possible_statuses(zone)
         change_date = initial_date
         currency_pair = random_currency_pair()
         currency_name = currency_pair[CURRENCY_PAIR_NAME]
         px = currency_pair[CURRENCY_PAIR_VALUE]
         vol = random_vol()
-        dynamic_fields = []
         for status in possible_statuses:
-            if status != 'New':
+            if status != NEW:
                 change_date += timedelta(microseconds=lcg.randint(*TIME_DELTA))
-            if status == 'Partially Filled':
+            if status == PARTIALLY_FILLED:
                 px = round(lcg.randomly_modify_value(*PX_DELTA_RANGE, px), PX_DEFAULT_ROUND)
-            if status == 'Rejected':
+            if status == REJECTED:
                 px = 0
                 vol = 0
-            dynamic_fields.append(
-                [str(change_date), status, currency_name, px, round(vol * px, VOL_DEFAULT_ROUND)]
-            )
+            dynamic_fields.append([str(change_date), status, currency_name, px, round(vol * px, VOL_DEFAULT_ROUND)])
         return dynamic_fields
 
-    order_id_sequence = iter(increment_order_id())
+    order_id_sequence = iter(increment_order_id(get_decimal_initial_order_id()))
 
     def generate_orders_for_zone(zone):
         zone_orders = []
-        date_sequence = iter(increment_date(zone))
-        order_creation_date = next(date_sequence)
+        order_id = next(order_id_sequence)
+        order_creation_date = get_zone_initial_date(zone)
+        date_sequence = iter(increment_date(order_creation_date, get_zone_time_step(zone)))
         for _ in range(get_zone_orders_count(zone)):
+            order_static_section = generate_order_static_section()
             for dynamic_field in generate_order_dynamic_section(zone, order_creation_date):
                 zone_orders.append([
-                    hex(next(order_id_sequence)),
-                    *generate_order_static_section(),
+                    hex(order_id),
+                    *order_static_section,
                     str(order_creation_date),
                     *dynamic_field
                 ])
             order_creation_date = next(date_sequence)
+            order_id = next(order_id_sequence)
         return zone_orders
 
     def generate_orders_for_all_zones():

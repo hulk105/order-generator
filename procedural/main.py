@@ -2,10 +2,11 @@ import logging
 import sys
 
 import yaml
+from pypika import Query
 
 import constants as const
 from order_history_generator.generator import generate_orders_history
-from sql_writer.writer import write_sql_query
+from sql_writer.writer import sql_insert
 
 """Init"""
 result_list = []
@@ -37,7 +38,7 @@ if __name__ == '__main__':
     try:
         for i in result_list:
             for j in i:
-                write_sql_query(sql_dump, const.TABLE_NAME, j)
+                sql_insert(sql_dump, const.TABLE_NAME, const.COLUMNS, j)
     except Exception as e:
         logger.exception(e, exc_info=const.EXCEPTION_INFO)
     else:

@@ -19,5 +19,19 @@ ORDER_GENERATOR_DATA_PATH = 'order_history_generator/generator_data.yaml'
 ORDER_GENERATOR_DATA_ABS_PATH = Path(PROJECT_ABS_PATH) / ORDER_GENERATOR_DATA_PATH
 
 # SQL
-TABLE_NAME = 'Orders'
-SQL_DUMP_FILENAME = 'orders_history_dump.sql'
+SQL_DUMP_FILENAME = 'orders_history_dump.cql'
+TABLE_NAME = 'orders_history'
+COLUMNS = (
+    'order_id',
+    'provider_id',
+    'direction',
+    'tags',
+    'description',
+    'extra_data',
+    'creation_date',
+    'change_date',
+    'status',
+    'currency',
+    'px',
+    'vol',
+)
