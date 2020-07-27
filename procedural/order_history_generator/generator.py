@@ -35,87 +35,103 @@ TIME_DELTA = 30000000, 60000000
 STATUS_TIME_DELTA = 100, 999999
 
 
-def generate_orders_history(data: dict, result_list: list):
-    # Incremental fields
-    def get_decimal_initial_order_id():
-        initial_order_id = int(data[INITIAL_ORDER_ID], 16)
-        return initial_order_id
+# Incremental fields
+def get_decimal_initial_order_id(data: dict):
+    initial_order_id = int(data[INITIAL_ORDER_ID], 16)
+    return initial_order_id
 
-    def increment_order_id(order_id: int):
-        order_id = order_id
+
+def increment_order_id(order_id: int):
+    order_id = order_id
+    yield order_id
+    while True:
+        order_id += lcg.randint(*ORDER_ID_INCREMENT_RANGE)
         yield order_id
-        while True:
-            order_id += lcg.randint(*ORDER_ID_INCREMENT_RANGE)
-            yield order_id
 
-    def random_provider_id():
-        provider_id = lcg.choice(data[PROVIDER_ID])
-        return provider_id
 
-    def random_direction():
-        direction = lcg.choice(data[DIRECTION])
-        return direction
+def random_provider_id(data: dict):
+    provider_id = lcg.choice(data[PROVIDER_ID])
+    return provider_id
 
-    def random_currency_pair():
-        currency_pair = lcg.choice(list(data[CURRENCY_PAIR].items()))
-        currency = currency_pair[CURRENCY_PAIR_NAME]
-        px_init = currency_pair[CURRENCY_PAIR_VALUE]
-        px = round(lcg.randomly_modify_value(*PX_DELTA_RANGE, px_init), PX_DEFAULT_ROUND)
-        return [currency, px]
 
-    def random_vol():
-        vol = lcg.randint(*RANDOM_VOL_RANGE)
-        return vol
+def random_direction(data: dict):
+    direction = lcg.choice(data[DIRECTION])
+    return direction
 
-    def random_tags():
-        tags = lcg.sample(data[TAGS], lcg.randint(*NUMBER_OF_TAGS_PER_ORDER))
-        return tags
 
-    def random_description():
-        pass
-        return None
+def random_currency_pair(data: dict):
+    currency_pair = lcg.choice(list(data[CURRENCY_PAIR].items()))
+    currency = currency_pair[CURRENCY_PAIR_NAME]
+    px_init = currency_pair[CURRENCY_PAIR_VALUE]
+    px = round(lcg.randomly_modify_value(*PX_DELTA_RANGE, px_init), PX_DEFAULT_ROUND)
+    return [currency, px]
 
-    def random_extra_data():
-        extra_data = lcg.randint(*RANDOM_EXTRA_DATA_HASH_RANGE)
-        return sha1(bytes(extra_data)).hexdigest()
 
-    # Dynamic (zone specific) fields
-    def get_zone_orders_count(zone):
-        total_orders = data[TOTAL_ORDERS]
-        percent_of_total_orders = data[ZONES][zone][PERCENT_OF_TOTAL_ORDERS]
-        zone_orders_count = int(total_orders * percent_of_total_orders)
-        return zone_orders_count
+def random_vol():
+    vol = lcg.randint(*RANDOM_VOL_RANGE)
+    return vol
 
-    def get_zone_initial_date(zone):
-        creation_date = datetime.strptime(data[ZONES][zone][INITIAL_DATE], const.DEFAULT_DATE_FORMAT)
-        return creation_date
 
-    def get_zone_end_date(zone):
-        end_date = datetime.strptime(data[ZONES][zone][END_DATE], const.DEFAULT_DATE_FORMAT)
-        return end_date
+def random_tags(data: dict):
+    tags = lcg.sample(data[TAGS], lcg.randint(*NUMBER_OF_TAGS_PER_ORDER))
+    return tags
 
-    def get_zone_time_step(zone):
-        time_step = (get_zone_end_date(zone) - get_zone_initial_date(zone)) / get_zone_orders_count(zone)
-        return time_step
 
-    def increment_date(date: datetime, time_step: timedelta):
-        while True:
-            date += time_step + timedelta(microseconds=lcg.randint(*STATUS_TIME_DELTA))
-            yield date
+def random_description():
+    pass
+    return None
 
-    def random_possible_statuses(zone):
-        statuses = lcg.choice(data[ZONES][zone][POSSIBLE_STATUSES])
-        return statuses
 
+def random_extra_data():
+    extra_data = lcg.randint(*RANDOM_EXTRA_DATA_HASH_RANGE)
+    return sha1(bytes(extra_data)).hexdigest()
+
+
+# Dynamic (zone specific) fields
+def get_zone_orders_count(data: dict, zone: str):
+    total_orders = data[TOTAL_ORDERS]
+    percent_of_total_orders = data[ZONES][zone][PERCENT_OF_TOTAL_ORDERS]
+    zone_orders_count = int(total_orders * percent_of_total_orders)
+    return zone_orders_count
+
+
+def get_zone_initial_date(data: dict, zone: str):
+    creation_date = datetime.strptime(data[ZONES][zone][INITIAL_DATE], const.DEFAULT_DATE_FORMAT)
+    return creation_date
+
+
+def get_zone_end_date(data: dict, zone: str):
+    end_date = datetime.strptime(data[ZONES][zone][END_DATE], const.DEFAULT_DATE_FORMAT)
+    return end_date
+
+
+def get_zone_time_step(data: dict, zone: str):
+    time_step = (get_zone_end_date(data, zone) - get_zone_initial_date(data, zone)) / get_zone_orders_count(data, zone)
+    return time_step
+
+
+def increment_date(date: datetime, time_step: timedelta):
+    while True:
+        date += time_step + timedelta(microseconds=lcg.randint(*STATUS_TIME_DELTA))
+        yield date
+
+
+def random_possible_statuses(data: dict, zone: str):
+    statuses = lcg.choice(data[ZONES][zone][POSSIBLE_STATUSES])
+    return statuses
+
+
+def generate_orders_history(data: dict, result_list: list):
     # Combined fields
     def generate_order_static_section() -> list:
-        return [random_provider_id(), random_direction(), random_tags(), random_description(), random_extra_data()]
+        return [random_provider_id(data), random_direction(data), random_tags(data), random_description(),
+                random_extra_data()]
 
     def generate_order_dynamic_section(zone, initial_date: datetime) -> list:
         dynamic_fields = []
-        possible_statuses = random_possible_statuses(zone)
+        possible_statuses = random_possible_statuses(data, zone)
         change_date = initial_date
-        currency_pair = random_currency_pair()
+        currency_pair = random_currency_pair(data)
         currency_name = currency_pair[CURRENCY_PAIR_NAME]
         px = currency_pair[CURRENCY_PAIR_VALUE]
         vol = random_vol()
@@ -130,14 +146,14 @@ def generate_orders_history(data: dict, result_list: list):
             dynamic_fields.append([str(change_date), status, currency_name, px, round(vol * px, VOL_DEFAULT_ROUND)])
         return dynamic_fields
 
-    order_id_sequence = iter(increment_order_id(get_decimal_initial_order_id()))
+    order_id_sequence = iter(increment_order_id(get_decimal_initial_order_id(data)))
 
     def generate_orders_for_zone(zone):
         zone_orders = []
         order_id = next(order_id_sequence)
-        order_creation_date = get_zone_initial_date(zone)
-        date_sequence = iter(increment_date(order_creation_date, get_zone_time_step(zone)))
-        for _ in range(get_zone_orders_count(zone)):
+        order_creation_date = get_zone_initial_date(data, zone)
+        date_sequence = iter(increment_date(order_creation_date, get_zone_time_step(data, zone)))
+        for _ in range(get_zone_orders_count(data, zone)):
             order_static_section = generate_order_static_section()
             for dynamic_field in generate_order_dynamic_section(zone, order_creation_date):
                 zone_orders.append([
