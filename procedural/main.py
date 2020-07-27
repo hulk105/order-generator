@@ -2,7 +2,6 @@ import logging
 import sys
 
 import yaml
-from pypika import Query
 
 import constants as const
 from order_history_generator.generator import generate_orders_history

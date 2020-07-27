@@ -2,7 +2,6 @@ from datetime import datetime
 from utils.utils import get_decimal_hash, get_digits_count
 import constants as const
 
-RANDOM_SEED = 'RANDOM_SEED'
 SEED = const.RANDOM_SEED
 DEFAULT_SEED_LENGTH = 8
 DEFAULT_STEP_DIVIDER = 3
