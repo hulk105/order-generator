@@ -9,20 +9,6 @@ from constants import *
 import lcg_generator.random as lcg
 from query_writer.writer import sql_insert
 
-CURRENCY_PAIR_NAME = 0
-CURRENCY_PAIR_VALUE = 1
-ORDER_ID_INCREMENT_RANGE = 3, 10
-PX_DEFAULT_ROUND = 6
-PX_DELTA_RANGE = 0.000001, 0.00001
-VOL_DEFAULT_ROUND = 4
-NUMBER_OF_TAGS_PER_ORDER = 1, 2
-RANDOM_VOL_RANGE = 1, 1000
-RANDOM_EXTRA_DATA_HASH_RANGE = 1, 2000
-
-# 30-60 seconds as microseconds
-TIME_DELTA = 30000000, 60000000
-TIME_DELTA_BETWEEN_STATUS = 100, 999999
-
 """Init"""
 result_list = []
 
