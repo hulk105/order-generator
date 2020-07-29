@@ -64,7 +64,7 @@ def sample(population: list, k: int):
     return list(dict.fromkeys(result_list))
 
 
-def randomly_modify_value(range_min, range_max, value):
+def randomly_modify_value(value: (int, float), range_min: (int, float), range_max: (int, float)):
     delta = randfloat(range_min, range_max)
     if randint(0, 1) == 0:
         return value + delta
