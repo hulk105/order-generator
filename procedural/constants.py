@@ -8,7 +8,7 @@ PROJECT_ABS_PATH = os.path.dirname(os.path.abspath(__file__))
 LOG_FILENAME = str(APP_NAME + '.log')
 LOG_DEFAULT_FORMAT = '%(asctime)s %(levelname)s %(message)s'
 LOG_DEFAULT_LOGGING_LEVEL = 10
-EXCEPTION_INFO = True
+DEBUG_PRINT = True
 
 # RANDOM
 DEFAULT_DATE_FORMAT = '%Y-%m-%d %H:%M:%S.%f'

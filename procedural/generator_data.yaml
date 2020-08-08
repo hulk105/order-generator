@@ -1,7 +1,7 @@
 TOTAL_ORDERS: 2000
 
 # Hex integer only
-INITIAL_ORDER_ID: deadbeef00
+INITIAL_ORDER_ID: deadbeaf01
 
 PROVIDER_ID:
   - SQM

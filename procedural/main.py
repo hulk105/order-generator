@@ -3,26 +3,28 @@ import sys
 from datetime import timedelta, datetime
 from hashlib import sha1
 
-import yaml
+from yaml import load, FullLoader
 
-from constants import *
 import lcg_generator.random as lcg
+from constants import *
 from query_writer.writer import sql_insert
 
-"""Init"""
-result_list = []
+# Init
+_result_list = []
 
-"""Setup"""
+# Setup
 logging.basicConfig(level=LOG_DEFAULT_LOGGING_LEVEL, filename=LOG_FILENAME, format=LOG_DEFAULT_FORMAT)
 logger = logging.getLogger(APP_NAME)
-logger.info('logger set up at %s, writing %s' % (logger.name, LOG_FILENAME))
+
+logger.info(f"logger set up at {logger.name}, writing to {LOG_FILENAME}")
 
 data_file = open(ORDER_GENERATOR_DATA_ABS_PATH)
-generator_data_dict = yaml.load(data_file, Loader=yaml.FullLoader)
+generator_data_dict = load(data_file, Loader=FullLoader)
+
 sql_dump = open(DUMP_FILENAME, 'w')
 
 TOTAL_ORDERS = generator_data_dict[TOTAL_ORDERS_KEY]
-INITIAL_ORDER_ID = generator_data_dict[INITIAL_ORDER_ID_KEY]
+INITIAL_ORDER_ID = str(generator_data_dict[INITIAL_ORDER_ID_KEY])
 PROVIDER_ID_LIST = generator_data_dict[PROVIDER_ID_KEY]
 DIRECTION_LIST = generator_data_dict[DIRECTION_KEY]
 CURRENCY_PAIR_LIST = list(generator_data_dict[CURRENCY_PAIR_KEY].items())
@@ -32,7 +34,10 @@ ZONES = generator_data_dict[ZONES_KEY]
 
 # Incremental fields
 def get_initial_order_id_as_decimal(initial_order_id_string: str):
-    return int(initial_order_id_string, 16)
+    try:
+        return int(initial_order_id_string, 16)
+    except ValueError:
+        raise ValueError(f"INITIAL_ORDER_ID value {initial_order_id_string} is not in hexadecimal format")
 
 
 def order_id_incrementer(initial_order_id: int):
@@ -41,6 +46,9 @@ def order_id_incrementer(initial_order_id: int):
     while True:
         order_id += lcg.randint(*ORDER_ID_INCREMENT_RANGE)
         yield order_id
+
+
+_order_id_sequence = iter(order_id_incrementer(get_initial_order_id_as_decimal(INITIAL_ORDER_ID)))
 
 
 def random_provider_id(provider_id_list: list):
@@ -76,7 +84,7 @@ def random_extra_data(value):
     return sha1(bytes(value)).hexdigest()
 
 
-# Dynamic (zone specific) fields
+# Zone specific) fields
 def get_zone_total_orders(zone: dict, total_orders: int):
     return int(total_orders * zone[ZONE_PERCENT_OF_TOTAL_ORDERS_KEY])
 
@@ -114,7 +122,7 @@ def generate_order_static_section() -> list:
     ]
 
 
-def generate_order_dynamic_section(zone: dict, order_initial_date: datetime) -> list:
+def generate_zone_specific_section(zone: dict, order_initial_date: datetime) -> list:
     dynamic_fields = []
     change_date = order_initial_date
     currency_pair = random_currency_pair(CURRENCY_PAIR_LIST)
@@ -133,52 +141,50 @@ def generate_order_dynamic_section(zone: dict, order_initial_date: datetime) -> 
     return dynamic_fields
 
 
-order_id_sequence = iter(order_id_incrementer(get_initial_order_id_as_decimal(INITIAL_ORDER_ID)))
-
-
 def generate_orders_for_zone(zone: dict):
     zone_orders = []
-    order_id = next(order_id_sequence)
+    order_id = next(_order_id_sequence)
     order_creation_date = get_zone_initial_date(zone)
     date_sequence = iter(date_incrementer(get_zone_initial_date(zone), get_zone_time_step(zone, TOTAL_ORDERS)))
     for _ in range(get_zone_total_orders(zone, TOTAL_ORDERS)):
         order_static_section = generate_order_static_section()
-        for dynamic_field in generate_order_dynamic_section(zone, order_creation_date):
+        for dynamic_field in generate_zone_specific_section(zone, order_creation_date):
             zone_orders.append([
                 hex(order_id),
                 *order_static_section,
                 str(order_creation_date),
                 *dynamic_field
             ])
-        order_id = next(order_id_sequence)
+        order_id = next(_order_id_sequence)
         order_creation_date = next(date_sequence)
     return zone_orders
 
 
 def generate_orders_for_all_zones():
     for zone in ZONES:
-        result_list.append(generate_orders_for_zone(ZONES[zone]))
+        _result_list.append(generate_orders_for_zone(ZONES[zone]))
 
 
 if __name__ == '__main__':
-    logger.info('%s started' % APP_NAME)
-    logger.info('start generating orders')
+    logger.info(f'{APP_NAME} started')
+    logger.info('generating orders')
 
     try:
         generate_orders_for_all_zones()
     except Exception as e:
-        logger.error(e, exc_info=EXCEPTION_INFO)
+        logger.error(e, exc_info=DEBUG_PRINT)
         sys.exit(1)
     else:
-        logger.info('succsessfully generated %s zones' % len(result_list))
+        logger.info(f"succsessfully generated {len(_result_list)} zones")
 
     logger.info('writing sql dump to %s' % sql_dump.name)
     try:
-        for i in result_list:
+        for i in _result_list:
             for j in i:
                 sql_insert(sql_dump, TABLE_NAME, COLUMNS, j)
     except Exception as e:
-        logger.exception(e, exc_info=EXCEPTION_INFO)
+        logger.exception(e, exc_info=DEBUG_PRINT)
     else:
-        logger.info('succsessfully wrote to %s' % sql_dump.name)
+        logger.info(f"succsessfully wrote to {sql_dump.name}")
+
 logger.info('Done')
