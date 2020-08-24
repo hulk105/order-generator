@@ -63,7 +63,7 @@ class LinearCongruentGenerator:
             result_list.append(list_item)
         return list(dict.fromkeys(result_list))
 
-    def randomly_modify_value(self, range_min, range_max, value):
+    def add_random_delta(self, range_min, range_max, value):
         delta = self.randfloat(range_min, range_max)
         if self.randint(0, 1) == 0:
             return value + delta

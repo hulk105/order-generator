@@ -7,6 +7,7 @@ GENERATOR_CONFIG_VALID_TYPES = {
     'PROVIDER_ID': type(list),
     'DIRECTION': type(list),
     'CURRENCY_PAIR': type(dict),
+    'ZONES': type(dict)
 }
 
 
@@ -15,13 +16,20 @@ class Config(ABC):
     def _parse_config(self, config_file_path):
         pass
 
+    def get_config(self):
+        pass
+
 
 class YAMLConfig(Config):
     def __init__(self, file_path: str):
-        self.config = self._parse_config(file_path)
+        self._config = self._parse_config(file_path)
 
     def _parse_config(self, config_file_path):
         return load(open(config_file_path), Loader=FullLoader)
+
+    @property
+    def get_config(self):
+        return self._config
 
 
 class OrderGeneratorConfig:
@@ -31,8 +39,5 @@ class OrderGeneratorConfig:
         self.initial_order_id = config['INITIAL_ORDER_ID']
         self.provider_id = config['PROVIDER_ID']
         self.direction = config['DIRECTION']
-        self.currency_pairs = config['CURRENCY_PAIR']
-
-
-generator_config = OrderGeneratorConfig(YAMLConfig('generator_data.yaml').config)
-print(generator_config.total_orders)
+        self.currency_pairs = list(config['CURRENCY_PAIR'].items())
+        self.zones = config['ZONES']
