@@ -1,57 +1,52 @@
-import math
-
 from utils.utils import get_digits_count, get_decimal_hash
 
+GOLDEN_RATIO = (1 + 5 ** 0.5) / 2
 SEED_LENGTH = 8
 DEFAULT_STEP_DIVIDER = 3
 STEP_DIVIDER_LENGTH = 1
 MULTIPLIER_INTEGER = 1
-DEFAULT_MULTIPLIER = math.pi
+DEFAULT_MULTIPLIER = GOLDEN_RATIO
 
 
 class LinearCongruentGenerator:
-    def __init__(self, seed_value=None, seed_length: int = SEED_LENGTH,
-                 step_divider: int = DEFAULT_STEP_DIVIDER, multiplier: float = None):
-        self._seed = get_decimal_hash(id(self), seed_length) \
-            if seed_value is None else get_decimal_hash(seed_value, seed_length)
-
-        _seed_hash = get_decimal_hash(self._seed, seed_length)
-
-        self._step_divider = step_divider \
-            if get_decimal_hash(self._seed, STEP_DIVIDER_LENGTH) == 0 \
-            else get_decimal_hash(self._seed, STEP_DIVIDER_LENGTH)
-
-        self._multiplier = MULTIPLIER_INTEGER + (_seed_hash / (10 ** get_digits_count(_seed_hash))) \
-            if multiplier is None else multiplier
-
+    def __init__(self, seed_value=None):
+        self._seed = get_decimal_hash(seed_value, SEED_LENGTH)
+        _seed_hash = get_decimal_hash(self._seed, SEED_LENGTH)
+        self._step_divider = get_decimal_hash(self._seed, STEP_DIVIDER_LENGTH)
+        self._multiplier = MULTIPLIER_INTEGER + (_seed_hash / (10 ** get_digits_count(_seed_hash)))
         self._sequence = iter(self._lcg(self._seed))
 
-    def _lcg(self, max):
+    def _lcg(self, max_value):
         current = self._seed
-        step = max // self._step_divider
+        step = max_value // self._step_divider
         while True:
-            next = (current * self._multiplier + step) % max
-            yield next
-            current = next
+            next_entry = (current * self._multiplier + step) % max_value
+            yield next_entry
+            current = next_entry
 
-    def seed(self, value, seed_length=SEED_LENGTH):
+    @property
+    def seed(self):
         """Change object instance seed parameters"""
-        pass
+        return self._seed
+
+    @seed.setter
+    def seed(self, seed_value):
+        self._seed = get_decimal_hash(seed_value, SEED_LENGTH)
 
     def get_current_status(self):
         print(self._seed, self._step_divider, self._multiplier)
 
-    def randint(self, min: int, max: int):
-        result = round(next(self._sequence)) % (max + 1)
-        if result < min:
-            return result + min
+    def randint(self, min_value: int, max_value: int):
+        result = round(next(self._sequence)) % (max_value + 1)
+        if result < min_value:
+            return result + min_value
         else:
             return result
 
-    def randfloat(self, min: float, max: float):
-        result = next(self._sequence) % max
-        if result < min:
-            return result + min
+    def randfloat(self, min_value: float, max_value: float):
+        result = next(self._sequence) % max_value
+        if result < min_value:
+            return result + min_value
         else:
             return result
 
@@ -74,3 +69,6 @@ class LinearCongruentGenerator:
             return value + delta
         else:
             return value - delta
+
+
+random = LinearCongruentGenerator()
