@@ -2,13 +2,16 @@ import logging
 import string
 import sys
 from abc import ABC, abstractmethod
-
+from Config import YAMLConfig
 from Exceptions import *
 from LCGenerator.Random import random
 
-BASE = 16
-ORDER_ID_HEX_DEFAULT_STRING = 'deadbeef'
-ORDER_ID_RAND_RANGE = 10, 20
+config = YAMLConfig()
+
+HEX_BASE = 16
+DEFAULT_ORDER_ID_HEX_STRING = 'deadbeef'
+DEFAULT_ORDER_ID_RAND_RANGE = 10, 20
+TOTAL_ORDERS = 2000
 
 
 class FieldStrategy(ABC):
@@ -17,30 +20,28 @@ class FieldStrategy(ABC):
         pass
 
 
-class IncrementalFieldStrategy(FieldStrategy):
-    def next_entry(self):
-        pass
+def is_hexadecimal(hex_string: str):
+    if all(character in string.hexdigits for character in hex_string) is True:
+        return True
+    else:
+        raise HexStringError(hex_string)
 
 
-class RandomFieldStrategy(FieldStrategy):
-    def next_entry(self):
-        pass
+def hex_to_int(hex_string: str):
+    try:
+        is_hexadecimal(hex_string)
+        return int(hex_string, HEX_BASE)
+    except HexStringError as e:
+        raise InvalidConfigurationError(e)
 
 
-class OrderIDFieldStrategy(IncrementalFieldStrategy):
+class OrderIDFieldStrategy(FieldStrategy):
     def __init__(self, initial_order_id_hex_string: str):
-        try:
-            if all(character in string.hexdigits for character in initial_order_id_hex_string) is True:
-                self.order_id = int(initial_order_id_hex_string, BASE)
-            else:
-                raise HexStringError(initial_order_id_hex_string)
-        except HexStringError as e:
-            logging.error(f"{e}. Set to default string '{ORDER_ID_HEX_DEFAULT_STRING}'")
-            self.order_id = int(ORDER_ID_HEX_DEFAULT_STRING, BASE)
+        self._order_id = hex_to_int(initial_order_id_hex_string)
 
     def next_entry(self):
-        self.order_id += random.randint(*ORDER_ID_RAND_RANGE)
-        return hex(self.order_id)
+        self._order_id += random.randint(*DEFAULT_ORDER_ID_RAND_RANGE)
+        return hex(self._order_id)
 
 
 class Context:
@@ -55,10 +56,10 @@ class Context:
     def strategy(self, strategy: FieldStrategy) -> None:
         self._strategy = strategy
 
-    def do_some_business_logic(self) -> None:
+    def execute(self) -> None:
         return self._strategy.next_entry()
 
 
-context = Context(OrderIDFieldStrategy('deadbeefg'))
+order_id_context = Context(OrderIDFieldStrategy('deadbeef01g'))
 for i in range(10):
-    print(context.do_some_business_logic())
+    print(order_id_context.execute())
