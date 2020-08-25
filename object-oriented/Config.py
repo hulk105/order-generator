@@ -39,5 +39,5 @@ class OrderGeneratorConfig:
         self.initial_order_id = config['INITIAL_ORDER_ID']
         self.provider_id = config['PROVIDER_ID']
         self.direction = config['DIRECTION']
-        self.currency_pairs = list(config['CURRENCY_PAIR'].items())
+        self.currency_pairs = config['CURRENCY_PAIR']
         self.zones = config['ZONES']
