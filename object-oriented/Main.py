@@ -19,9 +19,7 @@ def workflow():
     order_history_generator.generate_objects()
 
     for order in order_history_generator.get_orders_list():
-        print(order[:4])
-        for i in order[5]:
-            print(i)
+        print(order)
 
 
 def report():

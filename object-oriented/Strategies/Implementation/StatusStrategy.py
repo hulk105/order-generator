@@ -35,7 +35,6 @@ class StatusStrategy(FieldStrategy):
 
         for status in self._current_possible_statuses:
             self.check_status(status)
-            print(status, self._currency_strategy.get_current(), self._volume_strategy.get_current())
             _status_list.append(
                 [status, str(self._date_strategy.get_current()),
                  self._currency_strategy.get_current(), self._volume_strategy.get_current()]

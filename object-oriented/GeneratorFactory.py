@@ -47,7 +47,7 @@ class OrderHistoryGenerator(AbstractGenerator):
                                      vol_strategy=self._volume_strategy
                                      )
 
-            for _ in range(10):
+            for _ in range(self._config.total_orders):
                 self._orders_list.append(
                     [
                         self._order_id.next_entry(),
