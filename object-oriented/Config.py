@@ -37,17 +37,5 @@ class OrderGeneratorConfig:
         self.zones = config['ZONES']
         self.tags = config['TAGS']
 
-        # self.red_zone_initial_date = config['ZONES']['RED']['initial_date']
-        # self.red_zone_end_date = config['ZONES']['RED']['end_date']
-        # self.red_zone_orders_percent = config['ZONES']['RED']['percent_of_total_orders']
-        # self.red_zone_possible_statuses = config['ZONES']['RED']['possible_statuses']
-        #
-        # self.green_zone_initial_date = config['ZONES']['GREEN']['initial_date']
-        # self.green_zone_end_date = config['ZONES']['GREEN']['end_date']
-        # self.green_zone_orders_percent = config['ZONES']['GREEN']['percent_of_total_orders']
-        # self.green_zone_possible_statuses = config['ZONES']['GREEN']['possible_statuses']
-        #
-        # self.blue_zone_initial_date = config['ZONES']['BLUE']['initial_date']
-        # self.blue_zone_end_date = config['ZONES']['BLUE']['end_date']
-        # self.blue_zone_orders_percent = config['ZONES']['BLUE']['percent_of_total_orders']
-        # self.blue_zone_possible_statuses = config['ZONES']['BLUE']['possible_statuses']
+    def config(self, config: dict):
+        self.config = config

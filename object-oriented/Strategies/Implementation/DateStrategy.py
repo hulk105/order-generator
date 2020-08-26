@@ -30,4 +30,4 @@ class DateStrategy(FieldStrategy):
     def next_entry(self):
         self.increment_creation_date()
         self._change_date = self._creation_date
-        return self.get_current()
+        return str(self.get_current())
