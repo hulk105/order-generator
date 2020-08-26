@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 
-class FieldGeneratingStrategy(ABC):
+class FieldStrategy(ABC):
     @abstractmethod
     def get_current(self):
         pass

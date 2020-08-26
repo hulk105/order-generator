@@ -1,8 +1,8 @@
 from LCGenerator import random
-from Strategies import FieldGeneratingStrategy
+from Strategies.Interface import FieldStrategy
 
 
-class ProviderIDGeneratingStrategy(FieldGeneratingStrategy):
+class ProviderIDStrategy(FieldStrategy):
     def __init__(self, population: list):
         self._population = population
         self._current = None

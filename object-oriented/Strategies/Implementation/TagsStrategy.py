@@ -1,15 +1,15 @@
 from LCGenerator import random
-from Strategies import FieldGeneratingStrategy
+from Strategies.Interface import FieldStrategy
 
 
-class TagsGeneratingStrategy(FieldGeneratingStrategy):
+class TagsStrategy(FieldStrategy):
     def __init__(self, population: list):
         self._population = population
         self._current = None
         self._choice()
 
     def _choice(self):
-        self._current = random.choice(self._population)
+        self._current = random.sample(self._population, random.randint(1, 2))
 
     def get_current(self):
         return self._current

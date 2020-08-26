@@ -3,7 +3,7 @@ import string
 from Constants.Constants import HEX_BASE, DEFAULT_ORDER_ID_INCREMENT_RAND_RANGE
 from Exceptions import HexStringError
 from LCGenerator import random
-from Strategies import FieldGeneratingStrategy
+from Strategies.Interface import FieldStrategy
 
 
 def is_hexadecimal(hex_string: str):
@@ -21,7 +21,7 @@ def hex_to_int(hex_string: str):
         pass
 
 
-class OrderIDGeneratingStrategy(FieldGeneratingStrategy):
+class OrderIDStrategy(FieldStrategy):
     def __init__(self, initial_hex_string: str):
         self._hex_as_int = hex_to_int(initial_hex_string)
 

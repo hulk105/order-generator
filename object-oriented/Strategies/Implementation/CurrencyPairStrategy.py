@@ -1,9 +1,9 @@
-from Strategies import FieldGeneratingStrategy
+from Strategies.Interface import FieldStrategy
 from LCGenerator import random
 from Constants import DEFAULT_CURRENCY_RANDOM_RANGE_DELTA, DEFAULT_ROUND
 
 
-class CurrencyPairGeneratingStrategy(FieldGeneratingStrategy):
+class CurrencyPairStrategy(FieldStrategy):
     def __init__(self, currency_pairs: dict):
         self._currency_pairs = list(currency_pairs.items())
         self._current_currency = None
