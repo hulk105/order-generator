@@ -1,1 +1,1 @@
-from Strategies.Interface.FieldStrategyInterface import FieldStrategy
+from .FieldStrategyInterface import FieldStrategy

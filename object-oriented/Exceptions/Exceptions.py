@@ -11,3 +11,9 @@ class InvalidConfigurationError(Exception):
     def __init__(self, message):
         self.message = f"Invalid configuration from: {message}"
         super().__init__(self.message)
+
+
+class WrongValueError(Exception):
+    def __init__(self, message):
+        self.message = f"Wrong value {type(message)}: {message}"
+        super().__init__(self.message)

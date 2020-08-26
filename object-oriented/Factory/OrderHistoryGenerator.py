@@ -1,24 +1,6 @@
-from abc import ABC, abstractmethod
-
 from Config import OrderGeneratorConfig
+from Factory.Interface import AbstractGenerator
 from Strategies.Implementation import *
-
-
-class GeneratorFactory(ABC):
-    @abstractmethod
-    def create_generator(self, config):
-        pass
-
-
-class OrderHistoryGeneratorFactory(GeneratorFactory):
-    def create_generator(self, config):
-        return OrderHistoryGenerator(config)
-
-
-class AbstractGenerator(ABC):
-    @abstractmethod
-    def generate_objects(self):
-        pass
 
 
 class OrderHistoryGenerator(AbstractGenerator):

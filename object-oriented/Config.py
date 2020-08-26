@@ -2,6 +2,14 @@ from abc import ABC, abstractmethod
 from yaml import load, FullLoader
 
 
+def iterate_dict(d):
+    for k, v in d.items():
+        if isinstance(v, dict):
+            iterate_dict(v)
+        else:
+            print(k, ":", v)
+
+
 class Config(ABC):
     @abstractmethod
     def _parse_config(self, config_file_path):
