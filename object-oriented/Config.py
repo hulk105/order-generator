@@ -1,5 +1,16 @@
 from abc import ABC, abstractmethod
 from yaml import load, FullLoader
+from Exceptions import InvalidConfigurationError
+
+GENERATOR_CONFIG_VALID_TYPES = {
+    'TOTAL_ORDERS': 123,
+    'INITIAL_ORDER_ID': 'str',
+    'PROVIDER_ID': [],
+    'DIRECTION': [],
+    'CURRENCY_PAIR': {str: 1.1},
+    'ZONES': {},
+    'TAGS': []
+}
 
 
 def iterate_dict(d):
@@ -8,6 +19,14 @@ def iterate_dict(d):
             iterate_dict(v)
         else:
             print(k, ":", v)
+
+
+def validate_config_structure(validated, validator):
+    for key, value in validated.items():
+        if isinstance(value, dict):
+            validate_config_structure(value, validator)
+        else:
+            print(key, value)
 
 
 class Config(ABC):

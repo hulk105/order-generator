@@ -1,6 +1,7 @@
 from Config import OrderGeneratorConfig
 from Factory.Interface import AbstractGenerator
 from Strategies.Implementation import *
+from Constants import *
 
 
 class OrderHistoryGenerator(AbstractGenerator):
@@ -14,21 +15,18 @@ class OrderHistoryGenerator(AbstractGenerator):
         self._description = DescriptionStrategy()
         self._tags = TagsStrategy(self._config.tags)
         self._extra_data = ExtraDataStrategy()
-        self._orders_list = []
+        self._orders_list = None
 
     def generate_objects(self):
+        self._orders_list = []
         for zone in self._config.zones:
             _date = DateStrategy(
-                initial_date=self._config.zones[zone]['initial_date'],
-                end_date=self._config.zones[zone]['end_date'],
-                steps=self._config.total_orders * self._config.zones[zone]['percent_of_total_orders']
-            )
-            _status = StatusStrategy(population=self._config.zones[zone]['possible_statuses'],
+                initial_date=self._config.zones[zone][ZONE_INITIAL_DATE_KEY],
+                end_date=self._config.zones[zone][ZONE_END_DATE_KEY],
+                steps=self._config.total_orders * self._config.zones[zone][ZONE_PERCENT_OF_TOTAL_ORDERS_KEY])
+            _status = StatusStrategy(population=self._config.zones[zone][ZONE_POSSIBLE_STATUSES_KEY],
                                      date_strategy=_date,
-                                     currency_strategy=self._currency_pair,
-                                     vol_strategy=self._volume_strategy
-                                     )
-
+                                     currency_strategy=self._currency_pair, vol_strategy=self._volume_strategy)
             for _ in range(self._config.total_orders):
                 self._orders_list.append(
                     [
