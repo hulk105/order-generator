@@ -15,7 +15,9 @@ class Main:
         pass
 
     def setup(self):
-        logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(filename=LOG_FILE_PATH, level=logging.INFO)
+
+        logging.info(f'Reading config file at {CONFIG_FILE_PATH}')
         self.config = OrderGeneratorConfig(YAMLConfigProvider(CONFIG_FILE_PATH).get_config)
         self.sql_writer = SQLFileWriter(file=open(SQL_FILE_PATH, 'w'), table=SQL_TABLE_NAME)
 
@@ -38,5 +40,5 @@ if __name__ == '__main__':
         main.workflow()
         main.report()
     except Exception as e:
-        logging.error(e, exc_info=True)
+        logging.error(e, exc_info=False)
         sys.exit(1)

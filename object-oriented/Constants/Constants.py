@@ -13,6 +13,8 @@ ZONE_END_DATE_KEY = 'end_date'
 ZONE_PERCENT_OF_TOTAL_ORDERS_KEY = 'percent_of_total_orders'
 ZONE_POSSIBLE_STATUSES_KEY = 'possible_statuses'
 
+LOG_FILE_PATH = 'generator.log'
+
 CONFIG_FILE_PATH = 'generator_data.yaml'
 SQL_FILE_PATH = 'dump.sql'
 SQL_TABLE_NAME = 'Orders'
